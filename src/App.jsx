@@ -42,8 +42,6 @@ const T = {
       lighting:"Direct lighting, GI, IBL, Spherical Harmonics, тени.",
       cpp:"UObject система, макросы, архитектура проекта, GC, делегаты, паттерны.",
       ui:"UMG/Slate, MVVM, Invalidation, Retainer, ListView, материалы в UI, оптимизация.",
-      cpp:"UObject system, macros, project architecture, GC, delegates, patterns.",
-      ui:"UMG/Slate, MVVM, Invalidation, Retainer, ListView, UI materials, optimization.",
       vertex:"WPO, Vertex Color, VAT, Skeletal Mesh, Morph Targets.",
       effects:"Post-Process материалы, Niagara, Render Targets.",
       pipeline:"Python, EUW, FBX, Коллизии, Лайтмапы, CVars.",
@@ -85,8 +83,6 @@ const T = {
       optimization:"Profiling, LOD, instancing, textures, overdraw.",
       materials:"PBR theory, Material Graph, Instances, Functions, WPO.",
       lighting:"Direct lighting, GI, IBL, Spherical Harmonics, shadows.",
-      cpp:"UObject система, макросы, архитектура проекта, GC, делегаты, паттерны.",
-      ui:"UMG/Slate, MVVM, Invalidation, Retainer, ListView, материалы в UI, оптимизация.",
       cpp:"UObject system, macros, project architecture, GC, delegates, patterns.",
       ui:"UMG/Slate, MVVM, Invalidation, Retainer, ListView, UI materials, optimization.",
       vertex:"WPO, Vertex Color, VAT, Skeletal Mesh, Morph Targets.",
@@ -135,10 +131,12 @@ function LearnCard({tabs, tabsEn}){
   const active = activeTabs[activeKey] !== undefined ? activeKey : keys[0];
   useEffect(()=>setActiveKey(Object.keys((lang==='en'&&tabsEn)?tabsEn:tabs)[0]),[lang,tabs,tabsEn]);
   const icons={"Суть":"🔍","Аналогия":"💡","На интервью":"🎯","Зачем":"❓","Как работает":"⚙","Ошибки":"⚠","Core Idea":"🔍","Analogy":"💡","In Interview":"🎯","Why":"❓","How It Works":"⚙","Common Mistakes":"⚠"};
+  const ruToEn={"Суть":"Core Idea","Аналогия":"Analogy","На интервью":"In Interview","Зачем":"Why","Как работает":"How It Works","Ошибки":"Common Mistakes"};
+  const tabLabel=(k)=>lang==='en'?(ruToEn[k]||k):k;
   return(
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:10,overflow:"hidden",marginBottom:16}}>
       <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,flexWrap:"wrap"}}>
-        {keys.map(k=>(<button key={k} onClick={()=>setActiveKey(k)} style={{flex:1,minWidth:80,padding:"9px 8px",background:active===k?C.bg:"transparent",border:"none",borderBottom:active===k?`2px solid ${C.accent}`:"2px solid transparent",color:active===k?C.accent:C.muted,fontFamily:"monospace",fontSize:11,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><span>{icons[k]||"·"}</span>{k}</button>))}
+        {keys.map(k=>(<button key={k} onClick={()=>setActiveKey(k)} style={{flex:1,minWidth:80,padding:"9px 8px",background:active===k?C.bg:"transparent",border:"none",borderBottom:active===k?`2px solid ${C.accent}`:"2px solid transparent",color:active===k?C.accent:C.muted,fontFamily:"monospace",fontSize:11,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><span>{icons[k]||"·"}</span>{tabLabel(k)}</button>))}
       </div>
       <div style={{padding:"16px 18px",fontSize:14,color:C.text,lineHeight:1.8,minHeight:80,fontFamily:"system-ui,-apple-system,sans-serif"}}>
         {typeof activeTabs[active]==="string"
@@ -358,8 +356,8 @@ function SphereMaskViz(){
 function CoordSpaces(){
   const lang=useLang();
   const spaces=[
-    {name:"Model Space",short:"MS",col:C.orange,matrix:"× M",desc:"Вершины в координатах объекта (pivot = 0,0,0).",detail:"Так хранится меш в памяти. Позиции не зависят от положения объекта в мире."},
-    {name:"World Space",short:"WS",col:C.yellow,matrix:"× V",desc:"После Model matrix. Все объекты в единой системе координат.",detail:"Model Matrix = TRS трансформация объекта. Позволяет размещать объекты в мире."},
+    {name:"Model Space",short:"MS",col:C.orange,matrix:"× M",desc:lang==='ru'?"Вершины в координатах объекта (pivot = 0,0,0).":"Vertex coords relative to object (pivot = 0,0,0).",detail:lang==='ru'?"Так хранится меш в памяти. Позиции не зависят от положения объекта в мире.":"How the mesh is stored in memory. Positions are independent of the object's world position."},
+    {name:"World Space",short:"WS",col:C.yellow,matrix:"× V",desc:lang==='ru'?"После Model matrix. Все объекты в единой системе координат.":"After Model matrix. All objects in a unified system.",detail:"Model Matrix = TRS трансформация объекта. Позволяет размещать объекты в мире."},
     {name:"View Space",short:"VS",col:C.accent,matrix:"× P",desc:lang==='ru'?"Камера в начале координат, смотрит по -Z.":"Camera at origin, looking along -Z.",detail:"View Matrix = обратная трансформация камеры. Весь мир «едет» к камере."},
     {name:"Clip Space",short:"CS",col:C.green,matrix:"÷ w",desc:lang==='ru'?"После Projection matrix. Frustum culling здесь.":"After Projection matrix. Frustum culling happens here.",detail:"Projection matrix задаёт перспективу (frustum). Координаты в [-w, w]."},
     {name:"NDC",short:"NDC",col:C.purple,matrix:"Viewport",desc:lang==='ru'?"После деления на w. Диапазон [-1, 1] по всем осям.":"After dividing by w. Range [-1, 1] on all axes.",detail:"Normalized Device Coordinates. Одинаковы для всех GPU."},
@@ -720,8 +718,8 @@ function CoreDiagram(){
 function GPUPipeline(){
   const lang=useLang();
   const stages=[
-    {name:"Input Assembly",short:"IA",col:C.muted,desc:"Читает вершины и индексы из буферов. Формирует примитивы (треугольники). Не программируется.",code:null},
-    {name:"Vertex Shader",short:"VS",col:C.orange,desc:"Запускается PER VERTEX. Трансформирует позиции: Model→World→View→Clip. Обязательный этап.",code:`struct VSInput { float3 Position:POSITION; float3 Normal:NORMAL; float2 UV:TEXCOORD0; };
+    {name:"Input Assembly",short:"IA",col:C.muted,desc:lang==='ru'?"Читает вершины и индексы из буферов. Формирует примитивы (треугольники). Не программируется.":"Reads vertices and indices from buffers. Forms primitives (triangles). Not programmable.",code:null},
+    {name:"Vertex Shader",short:"VS",col:C.orange,desc:lang==='ru'?"Запускается PER VERTEX. Трансформирует позиции: Model→World→View→Clip. Обязательный этап.":"Runs PER VERTEX. Transforms positions: Model→World→View→Clip. Required stage.",code:`struct VSInput { float3 Position:POSITION; float3 Normal:NORMAL; float2 UV:TEXCOORD0; };
 struct VSOutput { float4 ClipPos:SV_Position; float3 WorldNormal:TEXCOORD0; float2 UV:TEXCOORD1; };
 VSOutput main(VSInput IN) {
     VSOutput OUT;
@@ -731,8 +729,8 @@ VSOutput main(VSInput IN) {
     OUT.UV = IN.UV;
     return OUT;
 }`},
-    {name:"Rasterization",short:"RAST",col:C.yellow,desc:"Интерполирует атрибуты вершин на пиксели треугольника. Генерирует фрагменты. Делает GPU, не программируется.",code:null},
-    {name:"Pixel Shader",short:"PS",col:C.accent,desc:"Запускается PER PIXEL. Вычисляет финальный цвет. Здесь вся работа: текстуры, освещение, эффекты.",code:`float4 main(PSInput IN) : SV_Target {
+    {name:"Rasterization",short:"RAST",col:C.yellow,desc:lang==='ru'?"Интерполирует атрибуты вершин на пиксели треугольника. Генерирует фрагменты. Делает GPU, не программируется.":"Interpolates vertex attributes to triangle pixels. Generates fragments. Fixed GPU stage.",code:null},
+    {name:"Pixel Shader",short:"PS",col:C.accent,desc:lang==='ru'?"Запускается PER PIXEL. Вычисляет финальный цвет. Здесь вся работа: текстуры, освещение, эффекты.":"Runs PER PIXEL. Computes final color. All texture, lighting, effect work happens here.",code:`float4 main(PSInput IN) : SV_Target {
     float3 N = normalize(IN.WorldNormal);
     float3 L = normalize(LightDir);
     float3 V = normalize(CameraPos - IN.WorldPos);
@@ -743,7 +741,7 @@ VSOutput main(VSInput IN) {
     float3 albedo = AlbedoTex.Sample(Samp, IN.UV).rgb;
     return float4(albedo * diffuse + spec + fresnel * RimColor, 1.0);
 }`},
-    {name:"Output Merger",short:"OM",col:C.green,desc:"Depth test (z-buffer), stencil test, alpha blending. Пишет результат в render target. Не программируется.",code:null},
+    {name:"Output Merger",short:"OM",col:C.green,desc:lang==='ru'?"Depth test (z-buffer), stencil test, alpha blending. Пишет результат в render target. Не программируется.":"Depth test (z-buffer), stencil test, alpha blending. Writes to render target. Not programmable.",code:null},
   ];
   const [active,setActive]=useState(1);
   return(
@@ -774,7 +772,7 @@ function BoundnessViz(){
     <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
       <div style={{flex:1,minWidth:220}}>
         <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:12,letterSpacing:2}}>ПАРАМЕТРЫ СЦЕНЫ</div>
-        {[{label:"Разрешение (%)",val:resScale,set:setResScale,min:25,max:200,col:C.accent,hint:lang==='ru'?"GPU-нагрузка растёт квадратично":"GPU load grows quadratically"},{label:"Draw Calls",val:drawCalls,set:setDrawCalls,min:1,max:100,col:C.orange,hint:lang==='ru'?"CPU-нагрузка":"CPU load"},{label:"Poly Count (%)",val:polyCount,set:setPolyCount,min:1,max:100,col:C.green,hint:lang==='ru'?"VS нагрузка на GPU":"VS load on GPU"}].map(({label,val,set,min,max,col,hint})=>(<div key={label} style={{marginBottom:16}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:"monospace",fontSize:11,color:C.muted}}>{label}</span><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{val}</span></div><input type="range" min={min} max={max} value={val} onChange={e=>set(Number(e.target.value))} style={{width:"100%",accentColor:col}}/><div style={{fontSize:10,color:C.dim,marginTop:2}}>{hint}</div></div>))}
+        {[{label:"Разрешение (%)",val:resScale,set:setResScale,min:25,max:200,col:C.accent,hint:lang==='ru'?lang==='ru'?"GPU-нагрузка растёт квадратично":"GPU load grows quadratically":"GPU load grows quadratically"},{label:"Draw Calls",val:drawCalls,set:setDrawCalls,min:1,max:100,col:C.orange,hint:lang==='ru'?lang==='ru'?"CPU-нагрузка":"CPU load":"CPU load"},{label:"Poly Count (%)",val:polyCount,set:setPolyCount,min:1,max:100,col:C.green,hint:lang==='ru'?lang==='ru'?"VS нагрузка на GPU":"VS load on GPU":"VS load on GPU"}].map(({label,val,set,min,max,col,hint})=>(<div key={label} style={{marginBottom:16}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:"monospace",fontSize:11,color:C.muted}}>{label}</span><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{val}</span></div><input type="range" min={min} max={max} value={val} onChange={e=>set(Number(e.target.value))} style={{width:"100%",accentColor:col}}/><div style={{fontSize:10,color:C.dim,marginTop:2}}>{hint}</div></div>))}
       </div>
       <div style={{flex:1,minWidth:220}}>
         <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:12,letterSpacing:2}}>НАГРУЗКА</div>
@@ -787,7 +785,7 @@ function BoundnessViz(){
         </div>
         <div style={{marginTop:12,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"10px 12px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:6}}>КАК ОПРЕДЕЛИТЬ В ПРОФАЙЛЕРЕ</div>
-          {[{t:"GPU-bound",d:"GPU frame time > CPU. Длинные GPU passes в RenderDoc.",c:C.accent},{t:"CPU-bound",d:"CPU frame time > GPU. GPU idle. stat GPU показывает низкую загрузку.",c:C.orange}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
+          {[{t:"GPU-bound",d:lang==='ru'?"GPU frame time > CPU. Длинные GPU passes в RenderDoc.":"GPU frame time > CPU. Long GPU passes in RenderDoc.",c:C.accent},{t:"CPU-bound",d:lang==='ru'?"CPU frame time > GPU. GPU idle. stat GPU показывает низкую загрузку.":"CPU frame time > GPU. GPU idle. stat GPU shows low utilization.",c:C.orange}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
         </div>
       </div>
     </div>
@@ -815,7 +813,7 @@ function DrawCallExplainer(){
         </div>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>КАК СОКРАТИТЬ</div>
-          {[{t:"Batching",d:"Merge static meshes в один draw call",c:C.green},{t:"Instancing (ISM/HISM)",d:"Тысячи копий = 1 draw call",c:C.accent},{t:"Atlasing",d:"Один material на много объектов",c:C.yellow},{t:"Nanite (UE5)",d:"Полностью обходит draw call limit",c:C.purple}].map(({t,d,c})=>(<div key={t} style={{marginBottom:7}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
+          {[{t:"Batching",d:lang==='ru'?"Merge static meshes в один draw call":"Merge static meshes into one draw call",c:C.green},{t:"Instancing (ISM/HISM)",d:lang==='ru'?"Тысячи копий = 1 draw call":"Thousands of copies = 1 draw call",c:C.accent},{t:"Atlasing",d:lang==='ru'?"Один material на много объектов":"One material for many objects",c:C.yellow},{t:"Nanite (UE5)",d:lang==='ru'?"Полностью обходит draw call limit":"Completely bypasses draw call limit",c:C.purple}].map(({t,d,c})=>(<div key={t} style={{marginBottom:7}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
         </div>
       </div>
     </div>
@@ -867,19 +865,19 @@ function Intrinsics(){
     {name:"normalize(V)",ret:"floatN",desc:lang==='ru'?"Нормализует вектор до единичной длины.":"Normalizes vector to unit length.",cat:"math"},
     {name:"length(V)",ret:"float",desc:lang==='ru'?"Длина вектора. Используй в Sphere Mask.":"Vector length. Use in Sphere Mask.",cat:"math"},
     {name:"reflect(I,N)",ret:"floatN",desc:lang==='ru'?"Вектор отражения для зеркал и specular.":"Reflection vector for mirrors and specular.",cat:"math"},
-    {name:"pow(x,n)",ret:"floatN",desc:"Степень. pow(spec,32) — контроль глянца.",cat:"math"},
-    {name:"abs(x)",ret:"floatN",desc:"Абсолютное значение.",cat:"math"},
-    {name:"frac(x)",ret:"floatN",desc:"Дробная часть. Тайлинг, паттерны.",cat:"math"},
-    {name:"floor/ceil(x)",ret:"floatN",desc:"Округление вниз/вверх.",cat:"math"},
-    {name:"lerp(A,B,t)",ret:"floatN",desc:"Линейная интерполяция. Blend материалов.",cat:"blend"},
-    {name:"saturate(x)",ret:"floatN",desc:"Клампит в [0,1]. Эквивалент clamp(x,0,1).",cat:"blend"},
-    {name:"step(edge,x)",ret:"floatN",desc:"0 если x < edge, иначе 1. Резкий переход.",cat:"blend"},
-    {name:"smoothstep(e0,e1,x)",ret:"floatN",desc:"Плавный S-переход между 0 и 1.",cat:"blend"},
-    {name:"clamp(x,mn,mx)",ret:"floatN",desc:"Ограничивает значение диапазоном [mn,mx].",cat:"blend"},
-    {name:"mul(M,V)",ret:"floatN",desc:"Умножение матрицы на вектор. Трансформации.",cat:"matrix"},
-    {name:"transpose(M)",ret:"floatNxN",desc:"Транспонирование матрицы.",cat:"matrix"},
-    {name:"Tex.Sample(S,UV)",ret:"float4",desc:"Семплирование текстуры в pixel shader.",cat:"texture"},
-    {name:"Tex.SampleLevel(S,UV,mip)",ret:"float4",desc:"Явный mip. Нужен в VS, CS — нет ddx/ddy.",cat:"texture"},
+    {name:"pow(x,n)",ret:"floatN",desc:lang==='ru'?"Степень. pow(spec,32) — контроль глянца.":"Power. pow(spec,32) — gloss control.",cat:"math"},
+    {name:"abs(x)",ret:"floatN",desc:lang==='ru'?"Абсолютное значение.":"Absolute value.",cat:"math"},
+    {name:"frac(x)",ret:"floatN",desc:lang==='ru'?"Дробная часть. Тайлинг, паттерны.":"Fractional part. Tiling, patterns.",cat:"math"},
+    {name:"floor/ceil(x)",ret:"floatN",desc:lang==='ru'?"Округление вниз/вверх.":"Round down/up.",cat:"math"},
+    {name:"lerp(A,B,t)",ret:"floatN",desc:lang==='ru'?"Линейная интерполяция. Blend материалов.":"Linear interpolation. Material blending.",cat:"blend"},
+    {name:"saturate(x)",ret:"floatN",desc:lang==='ru'?"Клампит в [0,1]. Эквивалент clamp(x,0,1).":"Clamps to [0,1]. Equivalent to clamp(x,0,1).",cat:"blend"},
+    {name:"step(edge,x)",ret:"floatN",desc:lang==='ru'?"0 если x < edge, иначе 1. Резкий переход.":"0 if x < edge, else 1. Hard step.",cat:"blend"},
+    {name:"smoothstep(e0,e1,x)",ret:"floatN",desc:lang==='ru'?"Плавный S-переход между 0 и 1.":"Smooth S-curve between 0 and 1.",cat:"blend"},
+    {name:"clamp(x,mn,mx)",ret:"floatN",desc:lang==='ru'?"Ограничивает значение диапазоном [mn,mx].":"Clamps value to [mn,mx] range.",cat:"blend"},
+    {name:"mul(M,V)",ret:"floatN",desc:lang==='ru'?"Умножение матрицы на вектор. Трансформации.":"Matrix-vector multiply. Transformations.",cat:"matrix"},
+    {name:"transpose(M)",ret:"floatNxN",desc:lang==='ru'?"Транспонирование матрицы.":"Matrix transpose.",cat:"matrix"},
+    {name:"Tex.Sample(S,UV)",ret:"float4",desc:lang==='ru'?"Семплирование текстуры в pixel shader.":"Texture sampling in pixel shader.",cat:"texture"},
+    {name:"Tex.SampleLevel(S,UV,mip)",ret:"float4",desc:lang==='ru'?"Явный mip. Нужен в VS, CS — нет ddx/ddy.":"Explicit mip. Required in VS, CS — no ddx/ddy.",cat:"texture"},
   ];
   const [cat,setCat]=useState("all");
   const cats=["all","math","blend","matrix","texture"];
@@ -980,8 +978,8 @@ function NormalMappingExplainer(){
       </svg>
       <div style={{flex:1,minWidth:220,display:"flex",flexDirection:"column",gap:12}}>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS"}</div>
-          {["Normal map хранит векторы в Tangent Space (RGB → XYZ, [0,1] → [-1,1])",lang==='ru'?"TBN матрица из Tangent (T), Bitangent (B), Normal (N)":"TBN matrix from Tangent (T), Bitangent (B), Normal (N)",lang==='ru'?"Вектор из normal map × TBN → World Space нормаль":"Vector from normal map × TBN → World Space normal",lang==='ru'?"World нормаль используется для lighting вместо геометрической":"World normal used for lighting instead of geometric"].map((t,i)=>(<div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:C.accent,fontFamily:"monospace",flexShrink:0}}>{i+1}.</span><span style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{t}</span></div>))}
+          <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS":"HOW IT WORKS"}</div>
+          {[lang==='ru'?"Normal map хранит векторы в Tangent Space (RGB → XYZ, [0,1] → [-1,1])":"Normal map stores vectors in Tangent Space (RGB → XYZ, [0,1] → [-1,1])",lang==='ru'?"TBN матрица из Tangent (T), Bitangent (B), Normal (N)":"TBN matrix from Tangent (T), Bitangent (B), Normal (N)",lang==='ru'?"Вектор из normal map × TBN → World Space нормаль":"Vector from normal map × TBN → World Space normal",lang==='ru'?lang==='ru'?"World нормаль используется для lighting вместо геометрической":"World normal used for lighting instead of geometric":"World normal used for lighting instead of geometric"].map((t,i)=>(<div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:C.accent,fontFamily:"monospace",flexShrink:0}}>{i+1}.</span><span style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{t}</span></div>))}
         </div>
         <Code lang="hlsl">{`float3 raw = NormalTex.Sample(S, uv).rgb;
 float3 tN  = raw * 2.0 - 1.0; // [0,1]→[-1,1]
@@ -1005,7 +1003,7 @@ function GBufferViz(){
   const buffers=[
     {name:"GBufferA",label:"World Normal",col:C.accent,
      desc:"RGB: нормаль поверхности в World Space после normal mapping. Alpha: shading model ID (Unlit=0, Default Lit=1, Subsurface=2...).",
-     why:lang==='ru'?"Нужна для Lighting Pass — без нормали не посчитать diffuse/specular.":"Needed for Lighting Pass — can't compute diffuse/specular without normals."},
+     why:lang==='ru'?lang==='ru'?"Нужна для Lighting Pass — без нормали не посчитать diffuse/specular.":"Needed for Lighting Pass — can't compute diffuse/specular without normals.":"Needed for Lighting Pass — can't compute diffuse/specular without normals."},
     {name:"GBufferB",label:"Metallic · Specular · Roughness",col:C.yellow,
      desc:"R: Metallic (0=диэлектрик, 1=металл). G: Specular (отражательная способность, обычно 0.5). B: Roughness. A: тени/AO флаги.",
      why:"PBR параметры для Lighting Pass. Одна текстура вместо трёх экономит bandwidth."},
@@ -1050,20 +1048,20 @@ function RenderPassesViz(){
      desc:"Рисует только depth, без цвета. Это позволяет Lighting Pass пропускать скрытые пиксели (Early-Z rejection). Опциональный, но важен для сложных сцен.",
      note:"Без PrePass GPU запускает pixel shader и только потом делает depth test — wasteful."},
     {short:"BASE",name:"Base Pass",col:C.orange,
-     desc:"Записывает данные о поверхности в G-Buffer: нормали, albedo, roughness, metallic. Шейдеры материалов выполняются здесь. Освещение НЕ считается.",
-     note:lang==='ru'?"В этом смысл deferred: разделить geometry pass и lighting pass.":"This is the point of deferred: separate geometry pass from lighting pass."},
+     desc:lang==='ru'?"Записывает данные о поверхности в G-Buffer: нормали, albedo, roughness, metallic. Шейдеры материалов выполняются здесь. Освещение НЕ считается.":"Writes surface data to G-Buffer: normals, albedo, roughness, metallic. Material shaders run here. Lighting NOT calculated.",
+     note:lang==='ru'?lang==='ru'?"В этом смысл deferred: разделить geometry pass и lighting pass.":"This is the point of deferred: separate geometry and lighting passes.":"This is the point of deferred: separate geometry pass from lighting pass."},
     {short:"LIGHT",name:"Lighting Pass",col:C.yellow,
      desc:"Читает G-Buffer, запускает все источники света. Каждый свет = screenspace quad или sphere. Считает diffuse, specular, shadows для всей сцены за один проход.",
-     note:"Ключевое преимущество deferred: N lights = N passes, не N×M materials×lights."},
+     note:lang==='ru'?"Ключевое преимущество deferred: N lights = N passes, не N×M materials×lights.":"Key deferred advantage: N lights = N passes, not N×M materials×lights."},
     {short:"LUMEN",name:"Lumen GI / Reflection",col:C.accent,
      desc:"Global illumination и отражения от Lumen. Software ray tracing по distance fields или Hardware RT. Добавляет indirect light и отражения.",
-     note:"Lumen работает после Lighting Pass, дополняя его indirect освещением."},
+     note:lang==='ru'?"Lumen работает после Lighting Pass, дополняя его indirect освещением.":"Lumen runs after Lighting Pass, adding indirect illumination."},
     {short:"TRANS",name:"Translucency",col:C.purple,
      desc:"Прозрачные объекты рендерятся отдельно в Forward режиме (sorted back-to-front). G-Buffer для них не используется — нет depth write.",
-     note:"Это основная причина почему Nanite не работает с transparent материалами."},
+     note:lang==='ru'?"Это основная причина почему Nanite не работает с transparent материалами.":"This is the main reason Nanite doesn't work with transparent materials."},
     {short:"POST",name:"Post-Process",col:C.green,
      desc:"Bloom, Tone Mapping, DoF, Motion Blur, Chromatic Aberration, SSAO, TAA, упскейл (TSR/DLSS). Всё работает в screen space поверх готового кадра.",
-     note:"Post-process дешёвый относительно geometry, но цепочка может быть длинной."},
+     note:lang==='ru'?"Post-process дешёвый относительно geometry, но цепочка может быть длинной.":"Post-process is cheap relative to geometry, but the chain can be long."},
   ];
   const [active,setActive]=useState(1);
   return(
@@ -1085,13 +1083,13 @@ function RenderPassesViz(){
 function DeferredVsForward(){
   const lang=useLang();
   const rows=[
-    {prop:"Lights",def:lang==='ru'?"N×M дорого → N отдельных passes":"N×M expensive → N separate passes",fwd:lang==='ru'?"Per-object, дорого при N lights":"Per-object, expensive with N lights"},
-    {prop:"Transparency",def:lang==='ru'?"Отдельный forward pass":"Separate forward pass",fwd:lang==='ru'?"Нативно":"Native"},
-    {prop:"MSAA",def:lang==='ru'?"Дорого/невозможно":"Expensive/not possible",fwd:lang==='ru'?"Нативно":"Native"},
-    {prop:"Memory",def:lang==='ru'?"Дорого (G-Buffer = ~100+ MB)":"Expensive (G-Buffer = ~100+ MB)",fwd:lang==='ru'?"Дёшево":"Cheap"},
-    {prop:"Mobile",def:lang==='ru'?"Плохо (bandwidth)":"Poor (bandwidth)",fwd:lang==='ru'?"Стандарт для mobile":"Standard for mobile"},
-    {prop:"Materials",def:lang==='ru'?"Неограниченно (все в G-Buffer)":"Unlimited (all in G-Buffer)",fwd:lang==='ru'?"Дорого при многих материалах":"Expensive with many materials"},
-    {prop:"UE5 default",def:lang==='ru'?"✓ Да":"✓ Yes",fwd:lang==='ru'?"Только для мобильных проектов":"Mobile projects only"},
+    {prop:"Lights",def:lang==='ru'?lang==='ru'?"N×M дорого → N отдельных passes":"N×M expensive → N separate passes":"N×M expensive → N separate passes",fwd:lang==='ru'?lang==='ru'?"Per-object, дорого при N lights":"Per-object, expensive with N lights":"Per-object, expensive with N lights"},
+    {prop:"Transparency",def:lang==='ru'?lang==='ru'?"Отдельный forward pass":"Separate forward pass":"Separate forward pass",fwd:lang==='ru'?lang==='ru'?"Нативно":"Native":"Native"},
+    {prop:"MSAA",def:lang==='ru'?lang==='ru'?"Дорого/невозможно":"Expensive/impossible":"Expensive/not possible",fwd:lang==='ru'?lang==='ru'?"Нативно":"Native":"Native"},
+    {prop:"Memory",def:lang==='ru'?lang==='ru'?"Дорого (G-Buffer = ~100+ MB)":"Expensive (G-Buffer = ~100+ MB)":"Expensive (G-Buffer = ~100+ MB)",fwd:lang==='ru'?lang==='ru'?"Дёшево":"Cheap":"Cheap"},
+    {prop:"Mobile",def:lang==='ru'?lang==='ru'?"Плохо (bandwidth)":"Poor (bandwidth)":"Poor (bandwidth)",fwd:lang==='ru'?lang==='ru'?"Стандарт для mobile":"Standard for mobile":"Standard for mobile"},
+    {prop:"Materials",def:lang==='ru'?lang==='ru'?"Неограниченно (все в G-Buffer)":"Unlimited (all in G-Buffer)":"Unlimited (all in G-Buffer)",fwd:lang==='ru'?lang==='ru'?"Дорого при многих материалах":"Expensive with many materials":"Expensive with many materials"},
+    {prop:"UE5 default",def:lang==='ru'?lang==='ru'?"✓ Да":"✓ Yes":"✓ Yes",fwd:lang==='ru'?lang==='ru'?"Только для мобильных проектов":"Mobile projects only":"Mobile projects only"},
   ];
   return(
     <div style={{overflowX:"auto"}}>
@@ -1116,21 +1114,21 @@ function LumenNaniteVSM(){
   const [tab,setTab]=useState("lumen");
   const items={
     lumen:{col:C.accent,title:"Lumen — Global Illumination",sections:[
-      {label:lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS",text:lang==='ru'?"Полностью динамическая система Global Illumination и отражений. Работает без запечённых лайтмапов. Свет обновляется в реальном времени при изменении геометрии и источников.":"Fully dynamic Global Illumination and reflections system. Works without baked lightmaps. Light updates in real time when geometry or sources change."},
-      {label:"КАК РАБОТАЕТ",text:lang==='ru'?"Software Ray Tracing: трассирует лучи по Distance Fields и Surface Cache — не по треугольникам. Hardware Ray Tracing: трассирует по реальной геометрии, точнее, но дороже. Результат — indirect lighting и отражения.":"Software Ray Tracing: traces rays through Distance Fields and Surface Cache, not triangles. Hardware Ray Tracing: real geometry, more accurate, more expensive. Result — indirect lighting and reflections."},
-      {label:"ОГРАНИЧЕНИЯ",text:lang==='ru'?"Не работает на мобильных платформах. Заметная задержка при резких изменениях освещения. Masked/translucent материалы не отражают свет корректно. Performance cost значительный (≈2-4ms на ПК).":"Doesn't work on mobile. Noticeable latency on sudden lighting changes. Masked/translucent materials don't reflect correctly. Significant performance cost (≈2-4ms on PC)."},
-      {label:lang==='ru'?"НАСТРОЙКА В UE5":"SETUP IN UE5",text:"Project Settings → Rendering → Global Illumination → Lumen. В PostProcessVolume: Lumen Global Illumination, Lumen Reflections. r.Lumen.Reflections.Allow 1."},
+      {label:lang==='ru'?lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS":"WHAT IS",text:lang==='ru'?lang==='ru'?"Полностью динамическая система Global Illumination и отражений. Работает без запечённых лайтмапов. Свет обновляется в реальном времени при изменении геометрии и источников.":"Fully dynamic Global Illumination and reflections. Works without baked lightmaps. Light updates in real time when geometry or sources change.":"Fully dynamic Global Illumination and reflections system. Works without baked lightmaps. Light updates in real time when geometry or sources change."},
+      {label:lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS",text:lang==='ru'?lang==='ru'?"Software Ray Tracing: трассирует лучи по Distance Fields и Surface Cache — не по треугольникам. Hardware Ray Tracing: трассирует по реальной геометрии, точнее, но дороже. Результат — indirect lighting и отражения.":"Software Ray Tracing: traces through Distance Fields and Surface Cache. Hardware Ray Tracing: real geometry, more accurate, more expensive. Result — indirect lighting and reflections.":"Software Ray Tracing: traces rays through Distance Fields and Surface Cache, not triangles. Hardware Ray Tracing: real geometry, more accurate, more expensive. Result — indirect lighting and reflections."},
+      {label:lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS",text:lang==='ru'?lang==='ru'?"Не работает на мобильных платформах. Заметная задержка при резких изменениях освещения. Masked/translucent материалы не отражают свет корректно. Performance cost значительный (≈2-4ms на ПК).":"Doesn't work on mobile. Noticeable latency on sudden lighting changes. Masked/translucent don't reflect correctly. Significant cost (≈2-4ms on PC).":"Doesn't work on mobile. Noticeable latency on sudden lighting changes. Masked/translucent materials don't reflect correctly. Significant performance cost (≈2-4ms on PC)."},
+      {label:lang==='ru'?lang==='ru'?"НАСТРОЙКА В UE5":"SETUP IN UE5":"SETUP IN UE5",text:"Project Settings → Rendering → Global Illumination → Lumen. В PostProcessVolume: Lumen Global Illumination, Lumen Reflections. r.Lumen.Reflections.Allow 1."},
     ]},
     nanite:{col:C.green,title:"Nanite — Virtualized Geometry",sections:[
-      {label:lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS",text:lang==='ru'?"Система виртуализированной микрополигональной геометрии. Позволяет использовать модели с миллионами полигонов без ручной настройки LOD. GPU рендерит только видимые кластеры треугольников.":"Virtualized micropolygon geometry system. Allows millions-of-polygon models without manual LOD. GPU renders only visible triangle clusters."},
-      {label:"КАК РАБОТАЕТ",text:lang==='ru'?"Меш делится на иерархические кластеры (clusters). GPU выбирает нужный уровень детализации для каждого кластера в реальном времени на основе экранного размера. Невидимые кластеры полностью пропускаются.":"Mesh divided into hierarchical clusters. GPU selects detail level per cluster in real time based on screen size. Invisible clusters fully skipped."},
-      {label:"ОГРАНИЧЕНИЯ",text:lang==='ru'?"НЕ работает с: Masked/Translucent материалами (только Opaque), World Position Offset (WPO движение в шейдере — в UE5.1+ частично поддерживается), Deformable meshes, Skeletal meshes. Не для mobile.":"Does NOT work with: Masked/Translucent materials (Opaque only), World Position Offset (WPO shader movement — partial UE5.1+ support), Deformable/Skeletal meshes. Not for mobile."},
-      {label:lang==='ru'?"КОГДА ИСПОЛЬЗОВАТЬ":"WHEN TO USE",text:lang==='ru'?"Архитектура, environment props, скалы, деревья (Static Mesh). НЕ для персонажей, флагов, анимированных объектов. Включается в Static Mesh Editor → Enable Nanite.":"Architecture, environment props, rocks, trees (Static Mesh). NOT for characters, flags, animated objects. Enable in Static Mesh Editor → Enable Nanite."},
+      {label:lang==='ru'?lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS":"WHAT IS",text:lang==='ru'?lang==='ru'?"Система виртуализированной микрополигональной геометрии. Позволяет использовать модели с миллионами полигонов без ручной настройки LOD. GPU рендерит только видимые кластеры треугольников.":"Virtualized micropolygon geometry. Models with millions of polygons without manual LOD. GPU renders only visible triangle clusters.":"Virtualized micropolygon geometry system. Allows millions-of-polygon models without manual LOD. GPU renders only visible triangle clusters."},
+      {label:lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS",text:lang==='ru'?lang==='ru'?"Меш делится на иерархические кластеры (clusters). GPU выбирает нужный уровень детализации для каждого кластера в реальном времени на основе экранного размера. Невидимые кластеры полностью пропускаются.":"Mesh split into hierarchical clusters. GPU selects detail level per cluster in real time by screen size. Invisible clusters fully skipped.":"Mesh divided into hierarchical clusters. GPU selects detail level per cluster in real time based on screen size. Invisible clusters fully skipped."},
+      {label:lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS",text:lang==='ru'?lang==='ru'?"НЕ работает с: Masked/Translucent материалами (только Opaque), World Position Offset (WPO движение в шейдере — в UE5.1+ частично поддерживается), Deformable meshes, Skeletal meshes. Не для mobile.":"Does NOT work with: Masked/Translucent (Opaque only), WPO (partial UE5.1+), Deformable/Skeletal meshes. Not for mobile.":"Does NOT work with: Masked/Translucent materials (Opaque only), World Position Offset (WPO shader movement — partial UE5.1+ support), Deformable/Skeletal meshes. Not for mobile."},
+      {label:lang==='ru'?lang==='ru'?"КОГДА ИСПОЛЬЗОВАТЬ":"WHEN TO USE":"WHEN TO USE",text:lang==='ru'?lang==='ru'?"Архитектура, environment props, скалы, деревья (Static Mesh). НЕ для персонажей, флагов, анимированных объектов. Включается в Static Mesh Editor → Enable Nanite.":"Architecture, env props, rocks, trees (Static Mesh). NOT for characters, flags, animated objects. Enable in Static Mesh Editor → Enable Nanite.":"Architecture, environment props, rocks, trees (Static Mesh). NOT for characters, flags, animated objects. Enable in Static Mesh Editor → Enable Nanite."},
     ]},
     vsm:{col:C.purple,title:"Virtual Shadow Maps",sections:[
-      {label:lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS",text:lang==='ru'?"Система теней для Nanite-объектов. Традиционные shadow maps не работают с Nanite — VSM решает это через виртуализацию: хранится только видимая часть shadow map.":"Shadow system for Nanite objects. Traditional shadow maps don't work with Nanite — VSM solves this via virtualization: only visible shadow map portions stored."},
-      {label:"КАК РАБОТАЕТ",text:"Shadow map разбивается на страницы (pages). Только страницы, видимые камере, рендерятся и хранятся в памяти. Это позволяет иметь очень высокое разрешение теней (16K+) без огромных затрат VRAM."},
-      {label:"ОГРАНИЧЕНИЯ",text:"Может мерцать на динамических объектах. Cache invalidation при движении объектов дорогой. Требует достаточно VRAM для страниц. Не идеален для быстро движущихся источников света."},
+      {label:lang==='ru'?lang==='ru'?"ЧТО ТАКОЕ":"WHAT IS":"WHAT IS",text:lang==='ru'?lang==='ru'?"Система теней для Nanite-объектов. Традиционные shadow maps не работают с Nanite — VSM решает это через виртуализацию: хранится только видимая часть shadow map.":"Shadow system for Nanite objects. Traditional shadow maps don't work with Nanite — VSM solves this via virtualization: only visible shadow map pages stored.":"Shadow system for Nanite objects. Traditional shadow maps don't work with Nanite — VSM solves this via virtualization: only visible shadow map portions stored."},
+      {label:lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS",text:"Shadow map разбивается на страницы (pages). Только страницы, видимые камере, рендерятся и хранятся в памяти. Это позволяет иметь очень высокое разрешение теней (16K+) без огромных затрат VRAM."},
+      {label:lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS",text:"Может мерцать на динамических объектах. Cache invalidation при движении объектов дорогой. Требует достаточно VRAM для страниц. Не идеален для быстро движущихся источников света."},
       {label:"НАСТРОЙКА",text:"Включается автоматически с Lumen. r.Shadow.Virtual.Enable 1. Shadow bias важен — Virtual Shadow Map Bias в Light настройках."},
     ]},
   };
@@ -1156,27 +1154,27 @@ function ProfilingTools(){
   const [tool,setTool]=useState("stat");
   const tools={
     stat:{col:C.accent,label:"stat GPU / stat Unit",items:[
-      {cmd:"stat GPU",desc:lang==='ru'?"Показывает время каждого GPU pass в ms. Ключевой инструмент.":"Shows time per GPU pass in ms. Key profiling tool."},
-      {cmd:"stat Unit",desc:lang==='ru'?"CPU/GPU/Frame/Game time. Сразу видно что является bottleneck.":"CPU/GPU/Frame/Game time. Instantly shows what's the bottleneck."},
-      {cmd:"stat SceneRendering",desc:lang==='ru'?"Draw calls, primitives, mesh draw calls по категориям.":"Draw calls, primitives, mesh draw calls by category."},
+      {cmd:"stat GPU",desc:lang==='ru'?lang==='ru'?"Показывает время каждого GPU pass в ms. Ключевой инструмент.":"Shows time per GPU pass in ms. Key profiling instrument.":"Shows time per GPU pass in ms. Key profiling tool."},
+      {cmd:"stat Unit",desc:lang==='ru'?lang==='ru'?"CPU/GPU/Frame/Game time. Сразу видно что является bottleneck.":"CPU/GPU/Frame/Game time. Instantly shows the bottleneck.":"CPU/GPU/Frame/Game time. Instantly shows what's the bottleneck."},
+      {cmd:"stat SceneRendering",desc:lang==='ru'?lang==='ru'?"Draw calls, primitives, mesh draw calls по категориям.":"Draw calls, primitives, mesh draw calls by category.":"Draw calls, primitives, mesh draw calls by category."},
       {cmd:"stat RHI",desc:"RHI draw calls, triangles, dispatch calls."},
-      {cmd:"r.ScreenPercentage 50",desc:lang==='ru'?"Снизить разрешение — если FPS вырос, значит GPU-bound.":"Lower resolution — if FPS increases, it's GPU-bound."},
-      {cmd:"profilegpu",desc:lang==='ru'?"Один подробный кадр GPU профайлинга с деревом passes.":"One detailed GPU profiling frame with pass tree."},
+      {cmd:"r.ScreenPercentage 50",desc:lang==='ru'?lang==='ru'?"Снизить разрешение — если FPS вырос, значит GPU-bound.":"Lower resolution — if FPS increases, it's GPU-bound.":"Lower resolution — if FPS increases, it's GPU-bound."},
+      {cmd:"profilegpu",desc:lang==='ru'?lang==='ru'?"Один подробный кадр GPU профайлинга с деревом passes.":"One detailed GPU profiling frame with pass tree.":"One detailed GPU profiling frame with pass tree."},
     ]},
     insights:{col:C.orange,label:"Unreal Insights",items:[
-      {cmd:"Trace",desc:"Запись сессии: CPU threads, GPU timeline, memory, frames."},
-      {cmd:"CPU Track",desc:"Видно какой Blueprint/код тормозит на CPU по функциям."},
-      {cmd:"GPU Track",desc:"Все render passes с точным временем выполнения."},
-      {cmd:"Memory Track",desc:"VRAM и RAM allocation по ассетам."},
-      {cmd:"Frame Analysis",desc:"Сравнение кадров, поиск hitches и spike'ов."},
+      {cmd:"Trace",desc:lang==='ru'?"Запись сессии: CPU threads, GPU timeline, memory, frames.":"Record session: CPU threads, GPU timeline, memory, frames."},
+      {cmd:"CPU Track",desc:lang==='ru'?"Видно какой Blueprint/код тормозит на CPU по функциям.":"See which Blueprint/code is slow by function."},
+      {cmd:"GPU Track",desc:lang==='ru'?"Все render passes с точным временем выполнения.":"All render passes with exact execution time."},
+      {cmd:"Memory Track",desc:lang==='ru'?"VRAM и RAM allocation по ассетам.":"VRAM and RAM allocation per asset."},
+      {cmd:"Frame Analysis",desc:lang==='ru'?"Сравнение кадров, поиск hitches и spike'ов.":"Frame comparison, finding hitches and spikes."},
     ]},
     renderdoc:{col:C.green,label:"RenderDoc",items:[
-      {cmd:"Capture Frame",desc:"Снимок одного кадра с полным GPU состоянием."},
-      {cmd:"Event Browser",desc:"Все draw calls, compute dispatches в хронологии."},
-      {cmd:"Pipeline State",desc:"Активные шейдеры, render targets, depth buffer."},
-      {cmd:"Texture Viewer",desc:"Просмотр G-Buffer каналов, shadow maps, любых RT."},
-      {cmd:"Shader Debug",desc:"Пошаговая отладка vertex/pixel shader (на Vulkan/DX12)."},
-      {cmd:"Timing",desc:"Время каждого draw call. Поиск самых дорогих операций."},
+      {cmd:"Capture Frame",desc:lang==='ru'?"Снимок одного кадра с полным GPU состоянием.":"Single frame snapshot with full GPU state."},
+      {cmd:"Event Browser",desc:lang==='ru'?"Все draw calls, compute dispatches в хронологии.":"All draw calls, compute dispatches in chronology."},
+      {cmd:"Pipeline State",desc:lang==='ru'?"Активные шейдеры, render targets, depth buffer.":"Active shaders, render targets, depth buffer."},
+      {cmd:"Texture Viewer",desc:lang==='ru'?"Просмотр G-Buffer каналов, shadow maps, любых RT.":"View G-Buffer channels, shadow maps, any RT."},
+      {cmd:"Shader Debug",desc:lang==='ru'?"Пошаговая отладка vertex/pixel shader (на Vulkan/DX12).":"Step-by-step vertex/pixel shader debugging (Vulkan/DX12)."},
+      {cmd:"Timing",desc:lang==='ru'?"Время каждого draw call. Поиск самых дорогих операций.":"Time per draw call. Finding most expensive operations."},
     ]},
   };
   const cur=tools[tool];
@@ -1199,11 +1197,11 @@ function LODViz(){
   const lang=useLang();
   const [screenPct,setScreenPct]=useState(15);
   const lodLevels=[
-    {lod:0,threshold:100,label:"LOD 0",desc:lang==='ru'?"Оригинал. Близко к камере.":"Original. Close to camera.",col:C.green},
-    {lod:1,threshold:50,label:"LOD 1",desc:lang==='ru'?"~50% полигонов.":"~50% polygons.",col:C.accent},
-    {lod:2,threshold:15,label:"LOD 2",desc:lang==='ru'?"~25% полигонов.":"~25% polygons.",col:C.yellow},
-    {lod:3,threshold:5,label:"LOD 3",desc:lang==='ru'?"~10% полигонов.":"~10% polygons.",col:C.orange},
-    {lod:4,threshold:1,label:"Culled",desc:lang==='ru'?"Объект скрыт.":"Object hidden.",col:C.red},
+    {lod:0,threshold:100,label:"LOD 0",desc:lang==='ru'?lang==='ru'?"Оригинал. Близко к камере.":"Original. Close to camera.":"Original. Close to camera.",col:C.green},
+    {lod:1,threshold:50,label:"LOD 1",desc:lang==='ru'?lang==='ru'?"~50% полигонов.":"~50% polygons.":"~50% polygons.",col:C.accent},
+    {lod:2,threshold:15,label:"LOD 2",desc:lang==='ru'?lang==='ru'?"~25% полигонов.":"~25% polygons.":"~25% polygons.",col:C.yellow},
+    {lod:3,threshold:5,label:"LOD 3",desc:lang==='ru'?lang==='ru'?"~10% полигонов.":"~10% polygons.":"~10% polygons.",col:C.orange},
+    {lod:4,threshold:1,label:"Culled",desc:lang==='ru'?lang==='ru'?"Объект скрыт.":"Object hidden.":"Object hidden.",col:C.red},
   ];
   const activeLod=lodLevels.findIndex((l,i)=>screenPct>=l.threshold||(i===lodLevels.length-1))||0;
   const currentLod=lodLevels.filter(l=>screenPct>=l.threshold).pop()||lodLevels[lodLevels.length-1];
@@ -1225,7 +1223,7 @@ function LODViz(){
           </div>))}
         </div>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?"НАСТРОЙКА В UE5":"SETUP IN UE5"}</div>
+          <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?lang==='ru'?"НАСТРОЙКА В UE5":"SETUP IN UE5":"SETUP IN UE5"}</div>
           {["Static Mesh Editor → LOD Settings","Screen Size — значение от 0.0 до 1.0 (не %)","Auto LOD generation: Reduction Settings → % triangles","HISM автоматически управляет LOD для instanced meshes","Nanite заменяет ручной LOD для statc meshes"].map(t=>(<div key={t} style={{fontSize:11,color:C.muted,marginBottom:5}}>› {t}</div>))}
         </div>
       </div>
@@ -1262,7 +1260,7 @@ function InstancingViz(){
         </div>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>КОГДА ПРИМЕНЯТЬ</div>
-          {[{t:"ISM",d:"Статичные объекты без culling нужды (колонны, плитка)",c:C.yellow},{t:"HISM",d:"Foliage, деревья, камни — всё что много и в большом мире",c:C.green},{t:"Nanite",d:"Если поддерживается — заменяет HISM для opaque static meshes",c:C.accent}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}:</span><span style={{fontSize:11,color:C.muted,marginLeft:6}}>{d}</span></div>))}
+          {[{t:"ISM",d:lang==='ru'?"Статичные объекты без culling нужды (колонны, плитка)":"Static objects without culling need (columns, tiles)",c:C.yellow},{t:"HISM",d:lang==='ru'?"Foliage, деревья, камни — всё что много и в большом мире":"Foliage, trees, rocks — anything numerous in an open world",c:C.green},{t:"Nanite",d:lang==='ru'?"Если поддерживается — заменяет HISM для opaque static meshes":"If supported — replaces HISM for opaque static meshes",c:C.accent}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}:</span><span style={{fontSize:11,color:C.muted,marginLeft:6}}>{d}</span></div>))}
         </div>
       </div>
     </div>
@@ -1273,7 +1271,7 @@ function TextureOptimization(){
   const lang=useLang();
   const items=[
     {title:"Texture Streaming",col:C.accent,
-     points:[lang==='ru'?"UE5 загружает mip-уровни по мере приближения камеры":"UE5 loads mip levels as camera approaches",lang==='ru'?"r.Streaming.PoolSize — размер пула в MB (default 1000)":"r.Streaming.PoolSize — pool size in MB (default 1000)",lang==='ru'?"Stat TextureGroup показывает использование по группам":"Stat TextureGroup shows usage per group","Texture Group определяет приоритет стриминга (World, Character, UI...)"]},
+     points:[lang==='ru'?lang==='ru'?"UE5 загружает mip-уровни по мере приближения камеры":"UE5 loads mip levels as camera approaches":"UE5 loads mip levels as camera approaches",lang==='ru'?lang==='ru'?"r.Streaming.PoolSize — размер пула в MB (default 1000)":"r.Streaming.PoolSize — pool size in MB (default 1000)":"r.Streaming.PoolSize — pool size in MB (default 1000)",lang==='ru'?lang==='ru'?"Stat TextureGroup показывает использование по группам":"Stat TextureGroup shows usage per group":"Stat TextureGroup shows usage per group","Texture Group определяет приоритет стриминга (World, Character, UI...)"]},
     {title:lang==='ru'?"Форматы и компрессия":"Formats and compression",col:C.orange,
      points:["BC1 (DXT1): RGB без альфы, 4bpp. Diffuse без прозрачности","BC3 (DXT5): RGBA, 8bpp. Diffuse с альфой, normal maps (вариант)","BC5: RG, 8bpp. Оптимально для normal maps (только RG хранятся)","BC7: высокое качество RGBA, 8bpp. Для сложных материалов","ASTC: мобильные платформы, гибкий ratio"]},
     {title:lang==='ru'?"Mip Maps":"Mip Maps",col:C.green,
@@ -1313,7 +1311,7 @@ function OverdrawSection(){
         </div>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>КАК СНИЗИТЬ</div>
-          {[{t:"Depth PrePass",d:lang==='ru'?"PS не запускается для скрытых пикселей":"PS doesn't run for hidden pixels",c:C.green},{t:"Front-to-back",d:lang==='ru'?"Opaque: ближние первыми, z-test убивает дальние":"Opaque: front-to-back, z-test kills far pixels",c:C.accent},{t:"Frustum/Occlusion Culling",d:lang==='ru'?"Не отправлять скрытую геометрию":"Don't submit hidden geometry",c:C.yellow},{t:"Упрощение particles",d:"Минимизировать слои прозрачности",c:C.orange}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
+          {[{t:"Depth PrePass",d:lang==='ru'?lang==='ru'?"PS не запускается для скрытых пикселей":"PS doesn't run for hidden pixels":"PS doesn't run for hidden pixels",c:C.green},{t:"Front-to-back",d:lang==='ru'?lang==='ru'?"Opaque: ближние первыми, z-test убивает дальние":"Opaque: front-to-back, z-test kills far pixels":"Opaque: front-to-back, z-test kills far pixels",c:C.accent},{t:"Frustum/Occlusion Culling",d:lang==='ru'?lang==='ru'?"Не отправлять скрытую геометрию":"Don't submit hidden geometry":"Don't submit hidden geometry",c:C.yellow},{t:"Упрощение particles",d:lang==='ru'?"Минимизировать слои прозрачности":"Minimize transparency layers",c:C.orange}].map(({t,d,c})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:c}}>{t}</span><div style={{fontSize:11,color:C.muted}}>{d}</div></div>))}
         </div>
       </div>
     </div>
@@ -1327,34 +1325,34 @@ function PythonAPIRef(){
   const [section,setSection]=useState("core");
   const sections={
     core:{col:C.accent,label:"Core API",items:[
-      {cmd:"import unreal",desc:lang==='ru'?"Импорт основного модуля. Работает в UE Python консоли и скриптах.":"Import main module. Works in UE Python console and scripts."},
-      {cmd:"unreal.EditorAssetLibrary",desc:"Основной класс для работы с ассетами: load, save, rename, duplicate, delete."},
-      {cmd:"unreal.AssetRegistryHelpers",desc:"Поиск ассетов по фильтрам — тип, путь, теги. Быстрее чем load каждого."},
-      {cmd:"unreal.EditorLevelLibrary",desc:"Работа с уровнем: spawn actors, get all actors, get selected actors."},
-      {cmd:"unreal.EditorUtilityLibrary",desc:lang==='ru'?"Утилиты для Editor: get selected assets, get selected actors.":"Editor utilities: get selected assets, get selected actors."},
-      {cmd:"unreal.SystemLibrary",desc:"Print string, is valid, timer functions и общие утилиты."},
+      {cmd:"import unreal",desc:lang==='ru'?lang==='ru'?"Импорт основного модуля. Работает в UE Python консоли и скриптах.":"Import main module. Works in UE Python console and scripts.":"Import main module. Works in UE Python console and scripts."},
+      {cmd:"unreal.EditorAssetLibrary",desc:lang==='ru'?"Основной класс для работы с ассетами: load, save, rename, duplicate, delete.":"Main class for asset operations: load, save, rename, duplicate, delete."},
+      {cmd:"unreal.AssetRegistryHelpers",desc:lang==='ru'?"Поиск ассетов по фильтрам — тип, путь, теги. Быстрее чем load каждого.":"Find assets by filters — type, path, tags. Faster than loading each."},
+      {cmd:"unreal.EditorLevelLibrary",desc:lang==='ru'?"Работа с уровнем: spawn actors, get all actors, get selected actors.":"Level operations: spawn actors, get all actors, get selected actors."},
+      {cmd:"unreal.EditorUtilityLibrary",desc:lang==='ru'?lang==='ru'?"Утилиты для Editor: get selected assets, get selected actors.":"Editor utilities: get selected assets, get selected actors.":"Editor utilities: get selected assets, get selected actors."},
+      {cmd:"unreal.SystemLibrary",desc:lang==='ru'?"Print string, is valid, timer functions и общие утилиты.":"Print string, is valid, timer functions, and general utilities."},
     ]},
     assets:{col:C.orange,label:"Ассеты",items:[
-      {cmd:"load_asset('/Game/Path/Asset')",desc:"Загружает ассет в память. Возвращает объект ассета."},
-      {cmd:"find_asset_data('/Game/Path')",desc:"Находит AssetData без загрузки в память — быстро."},
-      {cmd:"list_assets('/Game/Folder', recursive=True)",desc:"Список всех ассетов в папке. recursive=True — с подпапками."},
-      {cmd:"rename_asset(src, dst)",desc:"Переименовывает ассет. Обновляет все ссылки (redirect)."},
-      {cmd:"save_asset('/Game/Path/Asset')",desc:"Сохраняет ассет на диск."},
-      {cmd:"does_asset_exist('/Game/Path')",desc:"Проверяет существование ассета без загрузки."},
+      {cmd:"load_asset('/Game/Path/Asset')",desc:lang==='ru'?"Загружает ассет в память. Возвращает объект ассета.":"Loads asset into memory. Returns the asset object."},
+      {cmd:"find_asset_data('/Game/Path')",desc:lang==='ru'?"Находит AssetData без загрузки в память — быстро.":"Finds AssetData without loading into memory — fast."},
+      {cmd:"list_assets('/Game/Folder', recursive=True)",desc:lang==='ru'?"Список всех ассетов в папке. recursive=True — с подпапками.":"List all assets in folder. recursive=True — includes subfolders."},
+      {cmd:"rename_asset(src, dst)",desc:lang==='ru'?"Переименовывает ассет. Обновляет все ссылки (redirect).":"Renames asset. Updates all references (redirector)."},
+      {cmd:"save_asset('/Game/Path/Asset')",desc:lang==='ru'?"Сохраняет ассет на диск.":"Saves asset to disk."},
+      {cmd:"does_asset_exist('/Game/Path')",desc:lang==='ru'?"Проверяет существование ассета без загрузки.":"Checks asset existence without loading."},
     ]},
     actors:{col:C.green,label:"Акторы",items:[
-      {cmd:"get_all_level_actors()",desc:"Возвращает список всех акторов на текущем уровне."},
-      {cmd:"get_selected_level_actors()",desc:"Только выделенные акторы в редакторе."},
-      {cmd:"spawn_actor_from_class(cls, loc, rot)",desc:"Спавнит актора указанного класса на уровне."},
-      {cmd:"actor.get_actor_location()",desc:"Возвращает FVector позиции актора."},
-      {cmd:"actor.set_actor_location(vec, sweep, teleport)",desc:"Устанавливает позицию актора."},
-      {cmd:"actor.get_component_by_class(cls)",desc:"Получить компонент актора по классу."},
+      {cmd:"get_all_level_actors()",desc:lang==='ru'?"Возвращает список всех акторов на текущем уровне.":"Returns list of all actors on current level."},
+      {cmd:"get_selected_level_actors()",desc:lang==='ru'?"Только выделенные акторы в редакторе.":"Only selected actors in the editor."},
+      {cmd:"spawn_actor_from_class(cls, loc, rot)",desc:lang==='ru'?"Спавнит актора указанного класса на уровне.":"Spawns an actor of the specified class on the level."},
+      {cmd:"actor.get_actor_location()",desc:lang==='ru'?"Возвращает FVector позиции актора.":"Returns actor's FVector position."},
+      {cmd:"actor.set_actor_location(vec, sweep, teleport)",desc:lang==='ru'?"Устанавливает позицию актора.":"Sets actor's position."},
+      {cmd:"actor.get_component_by_class(cls)",desc:lang==='ru'?"Получить компонент актора по классу.":"Get actor component by class."},
     ]},
     props:{col:C.purple,label:"Свойства",items:[
-      {cmd:"obj.get_editor_property('name')",desc:"Читает editor-exposed свойство объекта по имени."},
-      {cmd:"obj.set_editor_property('name', val)",desc:"Устанавливает свойство. Основной способ изменить настройки ассета."},
-      {cmd:"unreal.EditorAssetLibrary.get_metadata_tag(asset, tag)",desc:"Читает metadata тег ассета (custom теги для пайплайна)."},
-      {cmd:"unreal.EditorAssetLibrary.set_metadata_tag(asset, tag, val)",desc:"Устанавливает metadata тег — для naming conventions, статусов."},
+      {cmd:"obj.get_editor_property('name')",desc:lang==='ru'?"Читает editor-exposed свойство объекта по имени.":"Reads editor-exposed property by name."},
+      {cmd:"obj.set_editor_property('name', val)",desc:lang==='ru'?"Устанавливает свойство. Основной способ изменить настройки ассета.":"Sets property. Main way to change asset settings."},
+      {cmd:"unreal.EditorAssetLibrary.get_metadata_tag(asset, tag)",desc:lang==='ru'?"Читает metadata тег ассета (custom теги для пайплайна).":"Reads asset metadata tag (custom pipeline tags)."},
+      {cmd:"unreal.EditorAssetLibrary.set_metadata_tag(asset, tag, val)",desc:lang==='ru'?"Устанавливает metadata тег — для naming conventions, статусов.":"Sets metadata tag — for naming conventions, statuses."},
     ]},
   };
   const cur=sections[section];
@@ -1448,7 +1446,7 @@ with open("C:/props.csv", "r") as f:
 function EUWSection(){
   const lang=useLang();
   const items=[
-    {title:lang==='ru'?"Что такое EUW":"What is EUW",col:C.accent,points:[lang==='ru'?"Editor Utility Widget — Blueprint-виджет, запускается внутри редактора как панель":"Editor Utility Widget — Blueprint widget running inside the editor as a panel",lang==='ru'?"Создаётся: Content Browser → Blueprint Class → EditorUtilityWidget":"Create: Content Browser → Blueprint Class → EditorUtilityWidget",lang==='ru'?"Запуск: ПКМ на EUW → Run Editor Utility Widget":"Launch: RMB on EUW → Run Editor Utility Widget",lang==='ru'?"Может вызывать Python скрипты через Execute Python Script node":"Can call Python scripts via Execute Python Script node"]},
+    {title:lang==='ru'?"Что такое EUW":"What is EUW",col:C.accent,points:[lang==='ru'?lang==='ru'?"Editor Utility Widget — Blueprint-виджет, запускается внутри редактора как панель":"Editor Utility Widget — Blueprint widget running inside the editor as a panel":"Editor Utility Widget — Blueprint widget running inside the editor as a panel",lang==='ru'?lang==='ru'?"Создаётся: Content Browser → Blueprint Class → EditorUtilityWidget":"Create: Content Browser → Blueprint Class → EditorUtilityWidget":"Create: Content Browser → Blueprint Class → EditorUtilityWidget",lang==='ru'?lang==='ru'?"Запуск: ПКМ на EUW → Run Editor Utility Widget":"Launch: RMB on EUW → Run Editor Utility Widget":"Launch: RMB on EUW → Run Editor Utility Widget",lang==='ru'?lang==='ru'?"Может вызывать Python скрипты через Execute Python Script node":"Can call Python scripts via Execute Python Script node":"Can call Python scripts via Execute Python Script node"]},
     {title:lang==='ru'?"Типовые инструменты для TA":"Typical TA Tools",col:C.orange,points:["Asset Browser с кастомными фильтрами и batch операциями","LOD Manager — массовая настройка LOD для группы мешей","Material Switcher — замена материалов по паттерну","Texture Audit — отчёт по превышению бюджета","Scene Cleaner — поиск и удаление orphaned ассетов"]},
     {title:lang==='ru'?"Blueprint → Python коммуникация":"Blueprint → Python communication",col:C.green,points:["Execute Python Script (node) — запуск строки или файла .py","unreal.PythonScriptLibrary.execute_python_command(str)","Данные передаются через Editor Properties или Metadata tags","Для сложной логики: Python делает тяжёлую работу, EUW — UI"]},
     {title:"Commandlets (headless режим)",col:C.purple,points:["UE4Editor-Cmd.exe <project> -run=<CommandletName>","Для CI/CD: автоматическая валидация при коммите","ResavePackages — пересохранение ассетов без открытия редактора","Кастомный Commandlet: наследуется от UCommandlet в C++","Запуск Python headless: -ExecutePythonScript=script.py"]},
@@ -1467,32 +1465,32 @@ function MayaPythonRef(){
   const [tab,setTab]=useState("cmds");
   const tabs={
     cmds:{col:C.accent,label:"maya.cmds",items:[
-      {cmd:"cmds.ls(type='mesh')",desc:"Список всех mesh-нод в сцене. type= фильтрует по типу."},
-      {cmd:"cmds.ls(selection=True)",desc:"Выделенные объекты. Основной способ получить текущий контекст."},
-      {cmd:"cmds.select('pCube1')",desc:"Выбрать объект по имени."},
-      {cmd:"cmds.rename('old', 'new')",desc:"Переименовать ноду."},
-      {cmd:"cmds.duplicate(rr=True)",desc:"Дублировать с сохранением иерархии (returnRoots)."},
-      {cmd:"cmds.delete('obj')",desc:"Удалить объект или компонент."},
-      {cmd:"cmds.getAttr('obj.tx')",desc:"Получить значение атрибута. tx=translate X."},
-      {cmd:"cmds.setAttr('obj.tx', 5.0)",desc:"Установить значение атрибута."},
-      {cmd:"cmds.file(path, exportSelected=True, type='FBX')",desc:"Экспорт FBX. type= определяет формат."},
-      {cmd:"cmds.polyCube(w=1, h=1, d=1)",desc:"Создать куб. Аналогично для других примитивов."},
+      {cmd:"cmds.ls(type='mesh')",desc:lang==='ru'?"Список всех mesh-нод в сцене. type= фильтрует по типу.":"List all mesh nodes in scene. type= filters by type."},
+      {cmd:"cmds.ls(selection=True)",desc:lang==='ru'?"Выделенные объекты. Основной способ получить текущий контекст.":"Selected objects. Main way to get current context."},
+      {cmd:"cmds.select('pCube1')",desc:lang==='ru'?"Выбрать объект по имени.":"Select object by name."},
+      {cmd:"cmds.rename('old', 'new')",desc:lang==='ru'?"Переименовать ноду.":"Rename node."},
+      {cmd:"cmds.duplicate(rr=True)",desc:lang==='ru'?"Дублировать с сохранением иерархии (returnRoots).":"Duplicate preserving hierarchy (returnRoots)."},
+      {cmd:"cmds.delete('obj')",desc:lang==='ru'?"Удалить объект или компонент.":"Delete object or component."},
+      {cmd:"cmds.getAttr('obj.tx')",desc:lang==='ru'?"Получить значение атрибута. tx=translate X.":"Get attribute value. tx=translate X."},
+      {cmd:"cmds.setAttr('obj.tx', 5.0)",desc:lang==='ru'?"Установить значение атрибута.":"Set attribute value."},
+      {cmd:"cmds.file(path, exportSelected=True, type='FBX')",desc:lang==='ru'?"Экспорт FBX. type= определяет формат.":"Export FBX. type= defines format."},
+      {cmd:"cmds.polyCube(w=1, h=1, d=1)",desc:lang==='ru'?"Создать куб. Аналогично для других примитивов.":"Create cube. Same for other primitives."},
     ]},
     pymel:{col:C.orange,label:"PyMEL",items:[
-      {cmd:"import pymel.core as pm",desc:"Импорт PyMEL. Объектно-ориентированная обёртка над cmds."},
-      {cmd:"pm.ls(type='mesh')",desc:"Аналог cmds.ls, но возвращает PyNode объекты."},
-      {cmd:"node = pm.PyNode('pCube1')",desc:"Получить PyNode по имени — объект с методами."},
-      {cmd:"node.tx.get()",desc:"Получить значение через атрибут объекта (чище чем getAttr)."},
-      {cmd:"node.tx.set(5.0)",desc:"Установить значение через атрибут объекта."},
-      {cmd:"node.listConnections()",desc:"Список всех соединений ноды. Удобно для анализа графа."},
+      {cmd:"import pymel.core as pm",desc:lang==='ru'?"Импорт PyMEL. Объектно-ориентированная обёртка над cmds.":"Import PyMEL. Object-oriented wrapper over cmds."},
+      {cmd:"pm.ls(type='mesh')",desc:lang==='ru'?"Аналог cmds.ls, но возвращает PyNode объекты.":"Like cmds.ls but returns PyNode objects."},
+      {cmd:"node = pm.PyNode('pCube1')",desc:lang==='ru'?"Получить PyNode по имени — объект с методами.":"Get PyNode by name — object with methods."},
+      {cmd:"node.tx.get()",desc:lang==='ru'?"Получить значение через атрибут объекта (чище чем getAttr).":"Get value via object attribute (cleaner than getAttr)."},
+      {cmd:"node.tx.set(5.0)",desc:lang==='ru'?"Установить значение через атрибут объекта.":"Set value via object attribute."},
+      {cmd:"node.listConnections()",desc:lang==='ru'?"Список всех соединений ноды. Удобно для анализа графа.":"List all node connections. Useful for graph analysis."},
     ]},
     diff:{col:C.green,label:"cmds vs PyMEL",items:[
-      {cmd:"Скорость",desc:"cmds быстрее — прямые вызовы MEL команд без overhead."},
-      {cmd:"Удобство",desc:"PyMEL удобнее для сложной логики — ООП, autocomplete, методы."},
-      {cmd:"Возврат строк",desc:"cmds возвращает строки (имена нод). PyMEL — объекты PyNode."},
-      {cmd:"Когда cmds",desc:"Простые скрипты, batch операции, скорость важна."},
-      {cmd:"Когда PyMEL",desc:"Сложные инструменты, работа с иерархией, анализ графа."},
-      {cmd:"pymxs (3ds Max)",desc:"Аналог PyMEL для 3ds Max. import pymxs; rt=pymxs.runtime."},
+      {cmd:lang==='ru'?"Скорость":"Speed",desc:lang==='ru'?"cmds быстрее — прямые вызовы MEL команд без overhead.":"cmds is faster — direct MEL calls without overhead."},
+      {cmd:lang==='ru'?"Удобство":"Convenience",desc:lang==='ru'?"PyMEL удобнее для сложной логики — ООП, autocomplete, методы.":"PyMEL is better for complex logic — OOP, autocomplete, methods."},
+      {cmd:lang==='ru'?"Возврат строк":"Returns strings",desc:lang==='ru'?"cmds возвращает строки (имена нод). PyMEL — объекты PyNode.":"cmds returns strings (node names). PyMEL — PyNode objects."},
+      {cmd:lang==='ru'?"Когда cmds":"When to use cmds",desc:lang==='ru'?"Простые скрипты, batch операции, скорость важна.":"Simple scripts, batch operations, speed matters."},
+      {cmd:"Когда PyMEL",desc:lang==='ru'?"Сложные инструменты, работа с иерархией, анализ графа.":"Complex tools, hierarchy work, graph analysis."},
+      {cmd:"pymxs (3ds Max)",desc:lang==='ru'?"Аналог PyMEL для 3ds Max. import pymxs; rt=pymxs.runtime.":"PyMEL equivalent for 3ds Max. import pymxs; rt=pymxs.runtime."},
     ]},
   };
   const cur=tabs[tab];
@@ -1512,10 +1510,10 @@ function BlueprintTATools(){
   const lang=useLang();
   const items=[
     {title:lang==='ru'?"Debug визуализация в рантайме":"Debug visualization at runtime",col:C.accent,points:[
-      lang==='ru'?"Draw Debug Sphere / Box / Line — рисует примитивы прямо в viewport":"Draw Debug Sphere / Box / Line — draws primitives directly in viewport",
-      lang==='ru'?"Print String — вывод значений без открытия дебаггера":"Print String — output values without opening debugger",
-      lang==='ru'?"Draw Debug Arrow — направление векторов (нормали, velocity)":"Draw Debug Arrow — vector direction (normals, velocity)",
-      lang==='ru'?"Полезно для проверки логики без C++ дебаггера":"Useful for logic verification without C++ debugger",
+      lang==='ru'?lang==='ru'?"Draw Debug Sphere / Box / Line — рисует примитивы прямо в viewport":"Draw Debug Sphere / Box / Line — draws primitives directly in viewport":"Draw Debug Sphere / Box / Line — draws primitives directly in viewport",
+      lang==='ru'?lang==='ru'?"Print String — вывод значений без открытия дебаггера":"Print String — output values without opening debugger":"Print String — output values without opening debugger",
+      lang==='ru'?lang==='ru'?"Draw Debug Arrow — направление векторов (нормали, velocity)":"Draw Debug Arrow — vector direction (normals, velocity)":"Draw Debug Arrow — vector direction (normals, velocity)",
+      lang==='ru'?lang==='ru'?"Полезно для проверки логики без C++ дебаггера":"Useful for logic verification without C++ debugger":"Useful for logic verification without C++ debugger",
     ]},
     {title:"Blueprint как прототип инструмента",col:C.orange,points:[
       "Actor с Editor Script Component — запускается в Editor, не в Play",
@@ -1598,13 +1596,13 @@ function PBRPlayground(){
       <div style={{flex:1,minWidth:200,display:"flex",flexDirection:"column",gap:10}}>
         <div style={{background:"#111827",border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:12,letterSpacing:1}}>{lang==='ru'?"PBR ПАРАМЕТРЫ":"PBR PARAMETERS"}</div>
-          {[{label:"Metallic",val:metallic,set:setMetallic,col:C.yellow,desc:metallic<0.1?lang==='ru'?"Диэлектрик: диффуз цветной, блик белый":"Dielectric: colored diffuse, white specular":metallic>0.9?lang==='ru'?"Металл: нет диффуза, блик цветной (альбедо)":"Metal: no diffuse, colored specular (albedo)":lang==='ru'?"Переход (не используй в PBR — только 0 или 1)":"Transition (don't use in PBR — only 0 or 1)"},{label:"Roughness",val:roughness,set:setRoughness,col:C.orange,desc:roughness<0.2?lang==='ru'?"Зеркальный — очень острый блик":"Mirror — very sharp highlight":roughness>0.7?lang==='ru'?"Матовый — широкий блик, нет отражений":"Matte — wide highlight, no reflections":lang==='ru'?"Полуглянцевый":"Semi-glossy"}].map(({label,val,set,col,desc})=>(<div key={label} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{label}</span><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{val.toFixed(2)}</span></div><input type="range" min={0} max={1} step={0.01} value={val} onChange={e=>set(Number(e.target.value))} style={{width:"100%",accentColor:col,marginBottom:4}}/><div style={{fontSize:11,color:C.muted}}>{desc}</div></div>))}
+          {[{label:"Metallic",val:metallic,set:setMetallic,col:C.yellow,desc:metallic<0.1?lang==='ru'?lang==='ru'?"Диэлектрик: диффуз цветной, блик белый":"Dielectric: colored diffuse, white specular":"Dielectric: colored diffuse, white specular":metallic>0.9?lang==='ru'?lang==='ru'?"Металл: нет диффуза, блик цветной (альбедо)":"Metal: no diffuse, colored specular (albedo)":"Metal: no diffuse, colored specular (albedo)":lang==='ru'?lang==='ru'?"Переход (не используй в PBR — только 0 или 1)":"Transition (don't use in PBR — only 0 or 1)":"Transition (don't use in PBR — only 0 or 1)"},{label:"Roughness",val:roughness,set:setRoughness,col:C.orange,desc:roughness<0.2?lang==='ru'?lang==='ru'?"Зеркальный — очень острый блик":"Mirror — very sharp highlight":"Mirror — very sharp highlight":roughness>0.7?lang==='ru'?lang==='ru'?"Матовый — широкий блик, нет отражений":"Matte — wide highlight, no reflections":"Matte — wide highlight, no reflections":lang==='ru'?lang==='ru'?"Полуглянцевый":"Semi-glossy":"Semi-glossy"}].map(({label,val,set,col,desc})=>(<div key={label} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{label}</span><span style={{fontFamily:"monospace",fontSize:11,color:col}}>{val.toFixed(2)}</span></div><input type="range" min={0} max={1} step={0.01} value={val} onChange={e=>set(Number(e.target.value))} style={{width:"100%",accentColor:col,marginBottom:4}}/><div style={{fontSize:11,color:C.muted}}>{desc}</div></div>))}
         </div>
         <div style={{background:"#111827",border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
           <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?"PBR ПРИНЦИПЫ":"PBR PRINCIPLES"}</div>
-          {[{t:"Energy Conservation",d:lang==='ru'?"Объект не может отражать больше света чем получает. Сумма диффуза и спекуляра ≤ 1":"Object can't reflect more light than it receives. Diffuse + specular ≤ 1"},
-            {t:lang==='ru'?"Metallic workflow":"Metallic workflow",d:"Metallic=0: диэлектрик (дерево,камень,кожа). Metallic=1: металл (железо,золото). Промежуточных значений нет в природе"},
-            {t:lang==='ru'?"Fresnel (F0)":"Fresnel (F0)",d:lang==='ru'?"Все поверхности отражают под острым углом. F0 для диэлектриков ≈ 0.04, для металлов = Albedo":"All surfaces reflect at grazing angles. F0 for dielectrics ≈ 0.04, for metals = Albedo"}].map(({t,d})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:C.purple}}>{t}</span><div style={{fontSize:11,color:C.muted,marginTop:2}}>{d}</div></div>))}
+          {[{t:"Energy Conservation",d:lang==='ru'?lang==='ru'?"Объект не может отражать больше света чем получает. Сумма диффуза и спекуляра ≤ 1":"Object can't reflect more light than it receives. Diffuse + specular ≤ 1":"Object can't reflect more light than it receives. Diffuse + specular ≤ 1"},
+            {t:lang==='ru'?"Metallic workflow":"Metallic workflow",d:lang==='ru'?"Metallic=0: диэлектрик (дерево,камень,кожа). Metallic=1: металл (железо,золото). Промежуточных значений нет в природе":"Metallic=0: dielectric (wood,stone,skin). Metallic=1: metal (iron,gold). No intermediate values in nature"},
+            {t:lang==='ru'?"Fresnel (F0)":"Fresnel (F0)",d:lang==='ru'?lang==='ru'?"Все поверхности отражают под острым углом. F0 для диэлектриков ≈ 0.04, для металлов = Albedo":"All surfaces reflect at grazing angles. F0 for dielectrics ≈ 0.04, for metals = Albedo":"All surfaces reflect at grazing angles. F0 for dielectrics ≈ 0.04, for metals = Albedo"}].map(({t,d})=>(<div key={t} style={{marginBottom:8}}><span style={{fontFamily:"monospace",fontSize:10,color:C.purple}}>{t}</span><div style={{fontSize:11,color:C.muted,marginTop:2}}>{d}</div></div>))}
         </div>
       </div>
     </div>
@@ -1698,6 +1696,44 @@ function MockInterview(){
     {q:"Чем Hard Reference отличается от Soft Reference в UE5?",a:"Hard ref (TObjectPtr): загружается вместе с owner классом — если BP ссылается на большую текстуру hard ref, текстура грузится всегда. Soft ref (TSoftObjectPtr): хранит только путь, загружается явно через Async Load. Использовать soft refs для опциональных ассетов, DLC контента, больших текстур которые не нужны сразу. Hard refs могут создавать circular dependencies.",tag:"pipeline",diff:"advanced"},
     {q:"Что такое Render Target и паттерн ping-pong?",a:"Render Target — текстура куда GPU рендерит напрямую. Ping-pong: 2 RT (A и B), кадр 1: читаем A → пишем B, кадр 2: читаем B → пишем A. Используется для симуляций в шейдере: вода, огонь, снег. GPU читает предыдущий кадр и вычисляет следующее состояние без CPU. Применение в UE5: Draw Material to Render Target ноды, или Blueprint.",tag:"effects",diff:"advanced"},
     {q:"Какие naming conventions для коллизий в FBX?",a:"UCX_MeshName — convex hull. Несколько: UCX_MeshName_01, UCX_MeshName_02. UBX_ box, USP_ sphere. Имя после префикса ДОЛЖНО совпадать с именем Static Mesh. Коллизионные меши экспортируются вместе с мешем в одном FBX. В UE5 при импорте: Import via FBX → коллизия подтягивается автоматически.",tag:"pipeline",diff:"basic"},
+
+
+
+    // ── LIGHTING OPTIMIZATION ─────────────────────────────────────────
+    {q:"На сцене 8 Stationary Point Lights в одной комнате. Что произойдёт?",a:"Stationary Lights ограничены 4 overlapping на один пиксель. При > 4 overlapping UE автоматически переключает их в Movable режим. Movable = full deferred shading каждый кадр. Диагностика: viewmode LightComplexity — красный цвет = проблема. Решение: уменьшить Attenuation Radius чтобы они меньше перекрывались, или часть сделать Static (если не двигаются), или использовать Lumen (который не ограничен количеством).",tag:"lighting",diff:"advanced"},
+    {q:"Как проверить что Cast Shadows на источнике света действительно нужен?",a:"viewmode LightComplexity → видно сколько lights влияет на пиксель. profilegpu → Shadows pass → сколько ms тратится. stat Lights → Dynamic Shadow Count. Практика: большинство декоративных источников (свечи в углу, маленькие лампы) не требуют Cast Shadows — тени от них не заметны. Emissive material + Post Process bloom = аналогичный визуальный эффект без shadow overhead. Cast Shadows нужен только там где тень заметна игроку.",tag:"lighting",diff:"basic"},
+    {q:"Lumen занимает 5ms. Как снизить стоимость?",a:"profilegpu → найти Lumen sub-passes: SurfaceCache, Radiosity, Reflections. Настройки (PostProcessVolume): Lumen GI Quality (снизить), Lumen Reflections Quality (снизить или отключить). CVars: r.Lumen.DiffuseIndirect.Allow 0 — отключить GI полностью (если есть запечённый), r.Lumen.Reflections.Allow 0 — отключить Lumen reflections (использовать Reflection Captures). r.LumenScene.SurfaceCacheResolution 0.5 — уменьшить разрешение surface cache вдвое. Software vs Hardware: r.Lumen.HardwareRayTracing 0 = дешевле но менее точно.",tag:"lighting",diff:"advanced"},
+    // ── ANTI-PATTERNS / MISTAKES ─────────────────────────────────────
+    {q:"Художник поставил Translucent на 500 листьев деревьев. Что пойдёт не так?",a:"1) Каждый лист = отдельный forward pass с расчётом всех источников света (нет G-Buffer). 2) Сортировка back-to-front по центру объекта = артефакты при пересечении. 3) Nanite не работает с Translucent. 4) Overdraw: 500 листьев сверху = 500 pixel shader passes для одних и тех же пикселей. Решение: Masked + clip() = depth write, Nanite совместимость, без forward pass. Two-Sided Foliage shading model для правильного light scattering.",tag:"materials",diff:"advanced"},
+    {q:"Разработчик сделал Static Switch 'Is Night Mode' в каждом материале сцены. В чём проблема?",a:"2^N permutations: если 10 материалов с этим switch = 2^10 = 1024 permutations при смене. Cook time взрывается. PSO cache огромный. Hitches при первом рендере ночью. Правильно: один Global Post Process Material с Scalar Parameter 'NightBlend'. Или Material Parameter Collection (MPC) 'NightAmount' — один вызов SetScalarParameterValue меняет все материалы мира. Scalar = constant buffer, нет permutation.",tag:"materials",diff:"advanced"},
+    {q:"UI разработчик жалуется что список игроков (200 человек) создаёт лаги. Ты смотришь код и видишь ScrollBox. Что делать?",a:"ScrollBox создаёт ВСЕ 200 виджетов одновременно при открытии. 200 × NativeConstruct + 200 виджетов в памяти + потенциально 200 × Tick. Решение: заменить на UListView + IUserObjectListEntry. ListView создаёт ~15-20 виджетов независимо от размера списка. При скролле: старый виджет получает новые данные через NativeOnListItemObjectSet(). 10x-100x улучшение производительности для больших списков.",tag:"ui",diff:"basic"},
+    {q:"Команда говорит 'нам нужна оптимизация — полигонов слишком много'. Ты открываешь stat Unit и видишь GPU=3ms, CPU=18ms. Что отвечаешь?",a:"Проблема не в полигонах. GPU=3ms, CPU=18ms = CPU-bound. Снижение polycount поможет только GPU. CPU сейчас простаивает, ждёт CPU. Следующий шаг: stat game → смотреть Game Thread. Unreal Insights → найти что именно на CPU. Скорее всего: Blueprint Tick, draw call submission, или AI/physics. Правило: оптимизировать только bottleneck, не то что кажется логичным.",tag:"optimization",diff:"basic"},
+    {q:"Ты включил Nanite на все Static Meshes в сцене для оптимизации. Что может сломаться?",a:"1) Все Translucent/Masked материалы — не работают с Nanite (UE5.0, в UE5.1+ Masked частично). 2) World Position Offset — не поддерживается в UE5.0. 3) Skeletal Meshes — Nanite не работает. 4) Очень маленькие меши (пропорция треугольников > screen pixels) — Nanite может быть медленнее LOD. 5) Two-pass vegetation materials ломаются. Nanite помогает с geometry-heavy статичными непрозрачными мешами. Сначала profilegpu → убедиться что bottleneck geometry, потом включать.",tag:"optimization",diff:"advanced"},
+    {q:"Разработчик жалуется что создал DMI и каждый кадр вызывает CreateDynamicMaterialInstance + SetScalarParameterValue. Почему это проблема?",a:"CreateDynamicMaterialInstance — дорогая операция: аллоцирует новый объект, компилирует вариант, создаёт constant buffer. При вызове каждый кадр = тысячи аллокаций, GC pressure, возможные hitches. SetScalarParameterValue само по себе дёшево. Правильно: создать DMI один раз (в BeginPlay/NativeConstruct), сохранить референс, потом только SetScalarParameterValue каждый кадр. Паттерн: UPROPERTY TObjectPtr<UMaterialInstanceDynamic> MatInstance;",tag:"materials",diff:"advanced"},
+    // ── NEW: HLSL ─────────────────────────────────────────────────────────
+    {q:"Что такое ddx() и ddy()? Где можно использовать, а где нет?",a:"ddx(x)/ddy(x) — производные значения x по экранному пространству: насколько x меняется от пикселя к соседнему. Вычисляются GPU аппаратно через разницу между соседними пикселями в 2x2 quad. Применения: автоматический mip-уровень в Sample(), fwidth() для anti-aliasing процедурных масок, анизотропная фильтрация. НЕ работают в Vertex Shader (нет соседних пикселей) и Compute Shader. В VS нужно использовать SampleLevel() с явным mip.",tag:"hlsl",diff:"advanced"},
+    {q:"Чем Sample() отличается от SampleLevel() и SampleGrad()?",a:"Sample(S,UV) — автоматически вычисляет mip через ddx/ddy. Только в Pixel Shader. SampleLevel(S,UV,mip) — явный mip-уровень. Работает везде (VS, CS, PS). Нужен когда нет ddx/ddy. SampleGrad(S,UV,ddx,ddy) — явные производные для анизотропной фильтрации. Дает полный контроль над mip. Когда использовать SampleLevel: в VS для чтения lookup texture (gradient map), в Compute Shader, когда нужен конкретный mip (LOD bias).",tag:"hlsl",diff:"advanced"},
+    {q:"Что такое branch divergence и почему это дорого на GPU?",a:"GPU выполняет шейдеры группами (warp/wavefront, обычно 32-64 потока) через SIMT. Все потоки в группе выполняют ОДНУ инструкцию одновременно. Если есть if/else и разные потоки идут по разным ветвям — GPU выполняет ОБЕ ветви для ВСЕЙ группы, маскируя ненужные. Итог: вместо 1x дорогой операции — 2x. Решение: step(), lerp(), saturate() вместо if. clip()/discard тоже дорог по этой причине.",tag:"hlsl",diff:"advanced"},
+    {q:"Что такое shader permutation? Как UE5 с этим работает?",a:"Permutation — отдельная скомпилированная версия шейдера под конкретную комбинацию static switches. Если в материале 3 статических переключателя — это 2³=8 permutations. Каждая компилируется отдельно при cook. Это: быстрее в рантайме (нет динамических ветвлений), но медленнее cook, больше размер пакета, дольше PSO compilation. В UE5: Static Switch Parameter в MaterialInstance = permutation. Scalar Parameter в DMI = constant buffer изменение, нет permutation.",tag:"hlsl",diff:"advanced"},
+    {q:"Почему texture sample дорогой? Как оптимизировать?",a:"Texture sample требует: обращение к texture cache (cache miss = ждать VRAM), фильтрацию (bilinear = 4 выборки, trilinear = 8, anisotropic = до 16), декомпрессию BC формата. Стоимость растёт с размером текстуры и количеством сэмплов. Оптимизации: channel packing (4 маски в один RGBA = 1 sample вместо 4), procedural (frac/sin вместо texture lookup), mip LOD bias (меньший mip = меньше cache miss), BC5 для нормалей (RG), убрать лишние семплы в PS.",tag:"hlsl",diff:"advanced"},
+    {q:"Что такое fwidth()? Как использовать для anti-aliasing масок?",a:"fwidth(x) = abs(ddx(x)) + abs(ddy(x)) — суммарное изменение x за один пиксель. Используется для сглаживания краёв процедурных масок. Вместо step(edge, x) — использовать smoothstep(edge-fwidth(x)*0.5, edge+fwidth(x)*0.5, x). Это даёт 1 пиксель мягкого перехода вместо резкого края с алиасингом. Работает только в PS (требует ddx/ddy). В UE5: Anti-aliased Mask нод делает это автоматически.",tag:"hlsl",diff:"advanced"},
+    // ── NEW: OPTIMIZATION ─────────────────────────────────────────────────
+    {q:"Как найти memory-heavy ассеты? Что такое memreport и Size Map?",a:"memreport: в консоли 'memreport -full' → Saved/Profiling/memreport*.txt. Показывает все ассеты в памяти с размером, включая streaming pool. Size Map: Content Browser → правый клик на папку → Size Map. Визуальная карта размеров ассетов. Reference Viewer: правый клик на ассет → Reference Viewer → видно кто держит ассет в памяти. Для VRAM: RenderDoc → Resource Inspector → сортировка по размеру. stat Memory / stat TextureGroup в рантайме.",tag:"optimization",diff:"advanced"},
+    {q:"Что такое hard reference и как они влияют на loading?",a:"Hard reference = прямая UPROPERTY ссылка на ассет. При загрузке объекта все hard references загружаются вместе. Проблема: игровой режим ссылается на Character BP → Character BP ссылается на 20 текстур → все 20 текстур загружаются при старте. Soft reference (TSoftObjectPtr, FSoftObjectPath) = строка пути, загружается явно. Диагностика: Reference Viewer. Паттерн: вместо UPROPERTY(EditAnywhere) UTexture2D* → UPROPERTY(EditAnywhere) TSoftObjectPtr<UTexture2D>.",tag:"optimization",diff:"advanced"},
+    {q:"Как диагностировать hitch (фризы)? Какой инструмент использовать?",a:"Hitch = резкое падение FPS > 33ms для одного кадра. Диагностика: 1) stat Hitches в консоли — логирует хитчи автоматически. 2) Unreal Insights: записать сессию с хитчем, найти в CPU timeline. 3) 'log LogSlowTasks Warning' — медленные операции. Причины: async loading завершился в игровом потоке, shader compilation (PSO hitches), garbage collection (GC.MaxObjectsInGame), Blueprint tick, streaming hitches. Решение PSO hitches: PSO Caching / Precache.",tag:"optimization",diff:"advanced"},
+    {q:"Что такое Blueprint tick cost и как его измерить?",a:"Каждый actor с Event Tick = CPU время в игровом потоке. 1000 Blueprint акторов с Tick = 1000 вызовов каждый кадр. Измерение: Tick Browser → Window → World Partition → Tick Browser (UE5). Или stat game в консоли + Unreal Insights CPU thread. Оптимизации: убрать Tick, использовать таймеры. SetActorTickInterval(0.1f) — тикать раз в 100ms. Disable Tick для неактивных. В C++: PrimaryActorTick.bCanEverTick = false в конструкторе.",tag:"optimization",diff:"advanced"},
+    {q:"Как профилировать shader compilation hitches? Что такое PSO Cache?",a:"PSO (Pipeline State Object) = скомпилированный state GPU (шейдер + render state). При первом встреченном PSO = hitch. PSO Cache: игра записывает PSO при первом запуске → кэш файл → следующий запуск компилирует заранее. В UE5: r.ShaderPipelineCache.Enabled 1. Запись: запустить игру в recording mode, пройти весь контент. Файл .rec.upipelinecache. В packaging добавить в additional cook data. Shader complexity view: viewmode ShaderComplexity.",tag:"optimization",diff:"advanced"},
+    // ── NEW: MATERIALS ────────────────────────────────────────────────────
+    {q:"Static Switch vs Scalar Parameter — в чём разница принципиально?",a:"Static Switch = создаёт отдельную permutation шейдера (отдельный скомпилированный вариант). Рантаймовая стоимость = 0 (выбранная ветвь hard-coded). Стоимость: время cook, PSO compilation, размер. Scalar Parameter = значение в constant buffer. Один шейдер для всех значений, динамически читает константу. Рантаймовая стоимость ~ 0. Используй Static Switch для: включить/выключить фичу (normal map, opacity mask). Используй Scalar для: интенсивность, blend factor, анимируемые значения.",tag:"materials",diff:"advanced"},
+    {q:"Masked vs Translucent material — почему это важно для оптимизации?",a:"Masked (clip/discard): пишет в depth buffer только полностью видимые пиксели. Нет сортировки. Работает с Nanite (частично в UE5.1+). Overdraw только по форме маски. Translucent: НЕ пишет в depth buffer. Требует сортировки back-to-front (Separate Translucency pass). Не работает с Nanite. Всегда overdraw. Правило: для листьев, решёток, сеток — всегда Masked. Translucent только для реального стекла/воды/VFX. UI-материалы — отдельный domain, своя оптимизация.",tag:"materials",diff:"basic"},
+    {q:"Что такое Material Parameter Collection (MPC) и когда использовать?",a:"MPC = глобальная таблица scalar/vector параметров, видимая всем материалам одновременно. Изменение MPC параметра обновляет ВСЕ материалы использующие его в одном вызове. Применения: время суток (солнце, небо, постобработка — все читают один MPC.TimeOfDay), погода (дождь = MPC.RainIntensity → все материалы на сцене мокрые), глобальный highlight/деактивация. Без MPC: нужно обходить все DMI и вызывать SetScalarParameterValue на каждом отдельно.",tag:"materials",diff:"advanced"},
+    {q:"Как работает channel packing текстур и зачем это делать?",a:"Channel packing = упаковка нескольких grayscale масок в RGBA каналы одной текстуры. Пример: R=Roughness, G=Metallic, B=AO, A=Emissive mask. Одна текстура вместо четырёх = 1 texture sample вместо 4. В UE5: отключить sRGB для packed текстуры (она не цвет), выбрать BC4 (1 канал) или BC5 (2 канала) для точности. Инструменты: Substance Painter output templates, Photoshop channels. Экономия: для мобильных критично (texture samples очень дорогие), на PC ускоряет texture cache.",tag:"materials",diff:"basic"},
+    {q:"Когда заменить texture mask процедурной математикой?",a:"Процедурные альтернативы быстрее когда маска простая: frac(UV*tiling) для тайлинг-паттернов, sin(UV.x*frequency)*0.5+0.5 для волн, length(UV-0.5) для circular mask (sphere mask без текстуры), smoothstep для gradient. Преимущества: нет texture sample = нет cache miss, масштабируется бесконечно, анимируется через параметры, меньше памяти. Недостатки: процедурный шум = дорого (sin/cos/frac). Правило: геометрические формы (круг, полосы, шахмат) = процедурно. Органические детали = текстура.",tag:"materials",diff:"advanced"},
+    // ── NEW: RENDERING ────────────────────────────────────────────────────
+    {q:"Как работает Custom Depth outline эффект? Опиши алгоритм.",a:"Алгоритм: 1) Выделенные объекты рендерятся в Custom Depth buffer (отдельный fullscreen depth pass). 2) Post-Process материал читает SceneTexture:CustomDepth. 3) Dilation: семплируем CustomDepth в N соседних пикселях (обычно 1-3px offset). 4) Если соседний пиксель = объект, но текущий пиксель нет → это контур → красим. В UE5: Actor → Render CustomDepth Pass=true. PP Material: SceneTexture:CustomDepth → сравнить с SceneTexture:Depth → outline там где CustomDepth есть, но normal depth нет.",tag:"rendering",diff:"advanced"},
+    {q:"Зачем нужны motion vectors? Что такое TAA и TSR?",a:"Motion vectors = текстура скорости пикселей между кадрами (в пикселях на кадр). Используются в: TAA/TSR (temporal anti-aliasing) — репроекция предыдущего кадра для смешивания, Motion blur — размытие по вектору движения, DLSS/FSR/TSR — апскейлинг через репроекцию. TAA = Temporal Anti-Aliasing (старый, ghosting проблема). TSR = Temporal Super Resolution (UE5 native upscale, лучше качество). При отсутствии motion vectors на объекте — ghosting и артефакты на TAA/TSR.",tag:"rendering",diff:"advanced"},
+    {q:"Почему translucency рендерится отдельным проходом?",a:"Translucent объекты НЕ пишут в depth buffer → нельзя использовать G-Buffer и deferred lighting. Проблемы: 1) Overlapping translucency должна быть отсортирована back-to-front (painter's algorithm). 2) Каждый translucent объект нужно освещать per-object (нет G-Buffer). 3) Самозатенение translucency сложно. В UE5: Separate Translucency pass после основного рендера. Forward shading для translucency. Transparency Sort Order настраивает сортировку. Translucent + Nanite = не работает по этой причине.",tag:"rendering",diff:"advanced"},
+    {q:"Как реконструировать World Position из depth buffer в Post-Process материале?",a:"Алгоритм: 1) SceneTexture:SceneDepth → получить depth Z. 2) Получить NDC XY из ScreenUV: NDC.x = UV.x*2-1, NDC.y = (1-UV.y)*2-1 (или UV.y*2-1 в зависимости от API). 3) Сформировать clip space позицию: float4(NDC.xy, Z, 1). 4) Умножить на InvViewProjectionMatrix. 5) Разделить на W. В UE5 Material Graph: ReconstructWorldPosition нод делает это автоматически читая SceneDepth. Применения: screen-space fog по высоте, proximity effects, custom depth-based effects.",tag:"rendering",diff:"advanced"},
     {q:"Как работают Event Dispatcher vs Blueprint Interface?",a:"Event Dispatcher: объект публикует событие, любой подписчик реагирует. Broadcast — всем подписчикам. Нет прямых ссылок. Blueprint Interface: контракт — если класс реализует интерфейс, можно вызвать метод без Cast. Interface лучше когда нужен return value. ED лучше для notify системы. Оба решают проблему hard reference через Cast To.",tag:"pipeline",diff:"advanced"},
 
     {q:"Что делает макрос UCLASS() и зачем он нужен?",a:"UCLASS регистрирует класс в системе рефлексии UE (Unreal Header Tool). Позволяет: GC управлять памятью объекта, Blueprint видеть класс, сериализации работать, CDO (Class Default Object) создаваться. Без UCLASS — класс не участвует в системе UE. GENERATED_BODY() вставляет сгенерированный UHT код.",tag:"cpp",diff:"basic"},
@@ -1728,7 +1764,7 @@ function MockInterview(){
   const [filter,setFilter]=useState("all");
   const [score,setScore]=useState({good:0,bad:0});
 
-  const tags=["all","linalg","gpu","rendering","hlsl","optimization","vertex","effects","pipeline","ui","cpp"];
+  const tags=["all","linalg","gpu","rendering","hlsl","optimization","materials","vertex","effects","pipeline","ui","cpp"];
   const diffs={basic:C.green,hot:C.orange,advanced:C.purple};
   const filtered=filter==="all"?qs:qs.filter(q=>q.tag===filter);
   const cur=filtered[idx%filtered.length];
@@ -1812,7 +1848,7 @@ float3 offset = float3(wave * 5.0 * mask,
           {t.uses.map(u=>(<div key={u} style={{display:"flex",gap:6,marginBottom:6}}><span style={{color:C.green,flexShrink:0}}>›</span><span style={{fontSize:12,color:C.muted,lineHeight:1.6,wordBreak:"break-word",fontFamily:"system-ui,-apple-system,sans-serif"}}>{u}</span></div>))}
         </div>
         <div style={{background:C.red+"12",border:`1px solid ${C.red}33`,borderRadius:8,padding:"12px 14px"}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:C.red,marginBottom:8}}>{lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS"}</div>
+          <div style={{fontFamily:"monospace",fontSize:10,color:C.red,marginBottom:8}}>{lang==='ru'?lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS":"LIMITATIONS"}</div>
           {t.limits.map(l=>(<div key={l} style={{display:"flex",gap:6,marginBottom:6}}><span style={{color:C.red,flexShrink:0}}>⚠</span><span style={{fontSize:12,color:C.muted,lineHeight:1.6,wordBreak:"break-word",fontFamily:"system-ui,-apple-system,sans-serif"}}>{l}</span></div>))}
         </div>
       </div>
@@ -1862,7 +1898,7 @@ function VATSection(){
   return(
     <div style={{display:"flex",flexDirection:"column",gap:12}}>
       <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:"12px 14px"}}>
-        <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS"}</div>
+        <div style={{fontFamily:"monospace",fontSize:10,color:C.muted,marginBottom:8}}>{lang==='ru'?lang==='ru'?"КАК РАБОТАЕТ":"HOW IT WORKS":"HOW IT WORKS"}</div>
         {(lang==='ru'?["Симуляция запускается в Houdini/Maya (ткань, физика, разрушение)","Каждый кадр: позиция каждой вершины пишется в пиксель текстуры","Текстура: X=вершина, Y=кадр анимации","В шейдере: читаем позицию из текстуры, добавляем к базовому мешу","Результат: тысячи объектов с уникальной анимацией за 1 draw call"]:
           ["Simulation runs in Houdini/Maya (cloth, physics, destruction)","Each frame: every vertex position written to a texture pixel","Texture: X=vertex, Y=animation frame","In shader: read position from texture, add to base mesh","Result: thousands of objects with unique animation in 1 draw call"]).map(s=>(<div key={s} style={{display:"flex",gap:8,marginBottom:6}}><span style={{color:C.accent,flexShrink:0,fontFamily:"monospace"}}>›</span><span style={{fontSize:13,color:C.muted,lineHeight:1.6,wordBreak:"break-word",fontFamily:"system-ui,-apple-system,sans-serif"}}>{s}</span></div>))}
       </div>
@@ -1888,7 +1924,7 @@ OUT.ClipPos = mul(ViewProjMatrix, float4(finalPos, 1.0));`}</Code>
           {(lang==='ru'?["1 draw call для тысяч объектов","GPU-driven — нет CPU overhead","Совместим с Nanite (статический меш)","Детерминированная анимация"]:["1 draw call for thousands of objects","GPU-driven — no CPU overhead","Compatible with Nanite (static mesh)","Deterministic animation"]).map(s=>(<div key={s} style={{fontSize:11,color:C.muted,marginBottom:4}}>› {s}</div>))}
         </div>
         <div style={{background:C.red+"12",border:`1px solid ${C.red}33`,borderRadius:8,padding:"12px 14px"}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:C.red,marginBottom:6}}>{lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS"}</div>
+          <div style={{fontFamily:"monospace",fontSize:10,color:C.red,marginBottom:6}}>{lang==='ru'?lang==='ru'?"ОГРАНИЧЕНИЯ":"LIMITATIONS":"LIMITATIONS"}</div>
           {(lang==='ru'?["Нет blending между анимациями","Нет ragdoll/интерактивной физики","Большие текстуры (float16/32)","Фиксированное количество вершин"]:["No blending between animations","No ragdoll/interactive physics","Large textures (float16/32)","Fixed vertex count"]).map(s=>(<div key={s} style={{fontSize:11,color:C.muted,marginBottom:4}}>› {s}</div>))}
         </div>
       </div>
@@ -3073,6 +3109,507 @@ function CommonUISection(){
   );
 }
 
+
+// ══ VISUALIZATIONS ══════════════════════════════════════════════════════════
+
+function CurvesViz(){
+  const lang=useLang();
+  const canvasRef=useRef(null);
+  const [t,setT]=useState(0.5);
+  useEffect(()=>{
+    const cv=canvasRef.current; if(!cv)return;
+    const ctx=cv.getContext('2d');
+    const W=cv.width,H=cv.height,pad=30;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,W,H);
+    // grid
+    ctx.strokeStyle='#1e2a3a'; ctx.lineWidth=1;
+    [0.25,0.5,0.75,1].forEach(v=>{
+      ctx.beginPath(); ctx.moveTo(pad+v*(W-2*pad),pad); ctx.lineTo(pad+v*(W-2*pad),H-pad); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad,pad+v*(H-2*pad)); ctx.lineTo(W-pad,pad+v*(H-2*pad)); ctx.stroke();
+    });
+    // axes labels
+    ctx.fillStyle='#8494b8'; ctx.font='10px monospace';
+    ctx.fillText('0',pad-12,H-pad+4); ctx.fillText('1',W-pad-4,H-pad+4);
+    ctx.fillText('1',pad-12,pad+4);
+    const x=v=>pad+v*(W-2*pad), y=v=>H-pad-v*(H-2*pad);
+    const N=100;
+    const curves=[
+      {name:'lerp',col:'#00c8ff',fn:v=>v},
+      {name:'smoothstep',col:'#3dff90',fn:v=>v*v*(3-2*v)},
+      {name:'step(0.5,t)',col:'#ffc234',fn:v=>v>=0.5?1:0},
+      {name:'smoothstep(0.3,0.7,t)',col:'#c084fc',fn:v=>{const u=Math.max(0,Math.min(1,(v-0.3)/0.4));return u*u*(3-2*u);}},
+    ];
+    curves.forEach(({col,fn})=>{
+      ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+      for(let i=0;i<=N;i++){const v=i/N; ctx.lineTo(x(v),y(fn(v)));}
+      ctx.stroke();
+    });
+    // vertical line at t
+    ctx.strokeStyle='#ffffff44'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(x(t),pad); ctx.lineTo(x(t),H-pad); ctx.stroke();
+    ctx.setLineDash([]);
+    // dots on each curve
+    curves.forEach(({col,fn})=>{
+      const val=fn(t);
+      ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(x(t),y(val),4,0,Math.PI*2); ctx.fill();
+    });
+  },[t]);
+  const curves=[
+    {name:'lerp',col:'#00c8ff',fn:v=>v},
+    {name:'smoothstep',col:'#3dff90',fn:v=>v*v*(3-2*v)},
+    {name:'step(0.5)',col:'#ffc234',fn:v=>v>=0.5?1:0},
+    {name:'smooth(0.3-0.7)',col:'#c084fc',fn:v=>{const u=Math.max(0,Math.min(1,(v-0.3)/0.4));return u*u*(3-2*u);}},
+  ];
+  return(<div style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'flex-start'}}>
+    <div><canvas ref={canvasRef} width={300} height={220} style={{borderRadius:8,border:`1px solid ${C.border}`}}/>
+    <div style={{marginTop:8}}>
+      <div style={{fontFamily:'monospace',fontSize:10,color:C.muted,marginBottom:4}}>t = {t.toFixed(2)}</div>
+      <input type="range" min={0} max={1} step={0.01} value={t} onChange={e=>setT(+e.target.value)} style={{width:300,accentColor:C.accent}}/>
+    </div></div>
+    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+      {curves.map(({name,col,fn})=>(<div key={name} style={{background:C.card,border:`1px solid ${col}44`,borderRadius:6,padding:'8px 12px',minWidth:160}}>
+        <div style={{fontFamily:'monospace',fontSize:11,color:col,marginBottom:3}}>{name}</div>
+        <div style={{fontSize:13,color:C.text,fontFamily:'monospace'}}>{fn(t).toFixed(3)}</div>
+      </div>))}
+    </div>
+  </div>);
+}
+
+function BlendModesViz(){
+  const lang=useLang();
+  const [active,setActive]=useState('masked');
+  const modes=[
+    {id:'opaque',col:C.green,label:'Opaque',
+     ruDesc:'Полностью замещает фон. Пишет depth. Nanite ✓.',
+     enDesc:'Fully replaces background. Writes depth. Nanite ✓.'},
+    {id:'masked',col:C.yellow,label:'Masked',
+     ruDesc:'clip() где маска < 0.33. Пишет depth там где видно. Nanite ✓.',
+     enDesc:'clip() where mask < 0.33. Writes depth where visible. Nanite ✓.'},
+    {id:'translucent',col:C.accent,label:'Translucent',
+     ruDesc:'НЕ пишет depth. Сортировка back-to-front. NO Nanite.',
+     enDesc:'Does NOT write depth. Sorted back-to-front. NO Nanite.'},
+    {id:'additive',col:C.purple,label:'Additive',
+     ruDesc:'Добавляет цвет поверх. Нет сортировки. Для огня/свечения.',
+     enDesc:'Adds color on top. No sorting needed. For fire/glow.'},
+  ];
+  const cur=modes.find(m=>m.id===active);
+  return(<div>
+    <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
+      {modes.map(m=>(<button key={m.id} onClick={()=>setActive(m.id)}
+        style={{background:active===m.id?m.col+'22':'transparent',border:`1px solid ${active===m.id?m.col:C.border}`,
+        borderRadius:6,padding:'5px 12px',color:active===m.id?m.col:C.muted,fontFamily:'monospace',fontSize:11,cursor:'pointer'}}>
+        {m.label}
+      </button>))}
+    </div>
+    <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'flex-start'}}>
+      <div style={{position:'relative',width:200,height:140,borderRadius:8,overflow:'hidden',border:`1px solid ${C.border}`}}>
+        {/* Checkered background */}
+        <div style={{position:'absolute',inset:0,background:'repeating-conic-gradient(#1a2030 0% 25%, #0d1117 0% 50%) 0 0 / 20px 20px'}}/>
+        {/* Colored rectangle behind */}
+        <div style={{position:'absolute',left:40,top:30,width:80,height:80,background:'#ff6b35',borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <span style={{fontFamily:'monospace',fontSize:9,color:'white'}}>BG</span>
+        </div>
+        {/* The blend mode object */}
+        <div style={{position:'absolute',left:70,top:50,width:80,height:70,
+          background: active==='opaque'?cur.col:
+                     active==='masked'?`radial-gradient(circle at 30% 40%, transparent 20%, transparent 35%, ${cur.col}88 36%, ${cur.col}88 60%, transparent 61%, transparent 75%, ${cur.col}88 76%)`:
+                     active==='translucent'?cur.col+'66':
+                     'transparent',
+          mixBlendMode: active==='additive'?'screen':'normal',
+          boxShadow: active==='additive'?`0 0 20px ${cur.col}, 0 0 40px ${cur.col}66`:'none',
+          borderRadius:4,
+          border: active==='additive'?`2px solid ${cur.col}`:'none',
+          display:'flex',alignItems:'center',justifyContent:'center',
+        }}>
+          {active==='additive'&&<div style={{background:cur.col+'88',width:'100%',height:'100%',borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <span style={{fontFamily:'monospace',fontSize:9,color:'white',fontWeight:'bold'}}>+GLOW</span>
+          </div>}
+        </div>
+      </div>
+      <div style={{background:cur.col+'12',border:`1px solid ${cur.col}44`,borderRadius:8,padding:'12px 14px',flex:1,minWidth:160}}>
+        <div style={{fontFamily:'monospace',fontSize:12,color:cur.col,fontWeight:700,marginBottom:6}}>{cur.label}</div>
+        <div style={{fontSize:12,color:C.muted,lineHeight:1.6}}>{lang==='ru'?cur.ruDesc:cur.enDesc}</div>
+        <div style={{marginTop:8,display:'flex',gap:6,flexWrap:'wrap'}}>
+          {active==='opaque'&&<><span style={{fontSize:10,background:C.green+'22',color:C.green,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>depth ✓</span><span style={{fontSize:10,background:C.green+'22',color:C.green,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>Nanite ✓</span><span style={{fontSize:10,background:C.green+'22',color:C.green,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>fastest</span></>}
+          {active==='masked'&&<><span style={{fontSize:10,background:C.yellow+'22',color:C.yellow,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>depth ✓</span><span style={{fontSize:10,background:C.yellow+'22',color:C.yellow,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>Nanite ✓</span><span style={{fontSize:10,background:C.red+'22',color:C.red,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>discard cost</span></>}
+          {active==='translucent'&&<><span style={{fontSize:10,background:C.red+'22',color:C.red,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>no depth</span><span style={{fontSize:10,background:C.red+'22',color:C.red,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>no Nanite</span><span style={{fontSize:10,background:C.red+'22',color:C.red,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>sorting</span></>}
+          {active==='additive'&&<><span style={{fontSize:10,background:C.purple+'22',color:C.purple,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>no depth</span><span style={{fontSize:10,background:C.green+'22',color:C.green,padding:'2px 6px',borderRadius:3,fontFamily:'monospace'}}>no sort needed</span></>}
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+function BranchDivergenceViz(){
+  const lang=useLang();
+  const [condition,setCondition]=useState(50);
+  const threads=Array.from({length:32},(_,i)=>i);
+  const threshold=condition/100*32;
+  const branchA=threads.filter(i=>i<threshold);
+  const branchB=threads.filter(i=>i>=threshold);
+  const isDiverged=branchA.length>0&&branchB.length>0;
+  const cost=isDiverged?2:1;
+  return(<div>
+    <div style={{marginBottom:12}}>
+      <div style={{fontFamily:'monospace',fontSize:10,color:C.muted,marginBottom:4}}>
+        {lang==='ru'?`Порог условия: ${condition}% потоков идут в ветвь A`:`Condition threshold: ${condition}% threads take branch A`}
+      </div>
+      <input type="range" min={0} max={100} value={condition} onChange={e=>setCondition(+e.target.value)}
+        style={{width:'100%',accentColor:C.accent}}/>
+    </div>
+    <div style={{background:'#111827',border:`1px solid ${C.border}`,borderRadius:8,padding:12,marginBottom:12}}>
+      <div style={{fontFamily:'monospace',fontSize:10,color:C.muted,marginBottom:8}}>
+        WARP — 32 {lang==='ru'?'потока':'threads'}
+      </div>
+      <div style={{display:'flex',flexWrap:'wrap',gap:3}}>
+        {threads.map(i=>(<div key={i} style={{
+          width:16,height:16,borderRadius:3,
+          background:i<threshold?C.orange+'cc':C.accent+'cc',
+          border:`1px solid ${i<threshold?C.orange:C.accent}`,
+          opacity:isDiverged?1:0.9,
+          transition:'background 0.2s',
+        }}/>))}
+      </div>
+      <div style={{display:'flex',gap:12,marginTop:8}}>
+        <div style={{display:'flex',alignItems:'center',gap:4}}>
+          <div style={{width:12,height:12,borderRadius:2,background:C.orange}}/>
+          <span style={{fontFamily:'monospace',fontSize:10,color:C.orange}}>
+            {lang==='ru'?`Ветвь A: ${branchA.length}`:`Branch A: ${branchA.length}`}
+          </span>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:4}}>
+          <div style={{width:12,height:12,borderRadius:2,background:C.accent}}/>
+          <span style={{fontFamily:'monospace',fontSize:10,color:C.accent}}>
+            {lang==='ru'?`Ветвь B: ${branchB.length}`:`Branch B: ${branchB.length}`}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+      <div style={{background:isDiverged?C.red+'12':C.green+'12',border:`1px solid ${isDiverged?C.red:C.green}44`,borderRadius:8,padding:'10px 12px'}}>
+        <div style={{fontFamily:'monospace',fontSize:11,color:isDiverged?C.red:C.green,fontWeight:700}}>
+          {isDiverged?(lang==='ru'?'⚠ DIVERGENCE':'⚠ DIVERGENCE'):(lang==='ru'?'✓ COHERENT':'✓ COHERENT')}
+        </div>
+        <div style={{fontSize:11,color:C.muted,marginTop:4}}>
+          {isDiverged
+            ?(lang==='ru'?'GPU выполняет ОБЕ ветви':'GPU executes BOTH branches')
+            :(lang==='ru'?'Все потоки — один путь':'All threads — same path')
+          }
+        </div>
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:8,padding:'10px 12px'}}>
+        <div style={{fontFamily:'monospace',fontSize:11,color:cost>1?C.red:C.green,fontWeight:700}}>
+          {lang==='ru'?`Стоимость: ${cost}×`:`Cost: ${cost}×`}
+        </div>
+        <div style={{fontSize:11,color:C.muted,marginTop:4}}>
+          {isDiverged
+            ?(lang==='ru'?`A:${branchA.length} + B:${branchB.length} = 2× passes`:`A:${branchA.length} + B:${branchB.length} = 2× passes`)
+            :(lang==='ru'?'Без overhead':'No overhead')
+          }
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+function FresnelViz(){
+  const lang=useLang();
+  const [angle,setAngle]=useState(45);
+  const canvasRef=useRef(null);
+  const schlick=(f0,cosA)=>f0+(1-f0)*Math.pow(1-cosA,5);
+  useEffect(()=>{
+    const cv=canvasRef.current; if(!cv)return;
+    const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height,pad=30;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='#1e2a3a'; ctx.lineWidth=1;
+    [0.25,0.5,0.75,1].forEach(v=>{
+      ctx.beginPath(); ctx.moveTo(pad+v*(W-2*pad),pad); ctx.lineTo(pad+v*(W-2*pad),H-pad); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad,H-pad-v*(H-2*pad)); ctx.lineTo(W-pad,H-pad-v*(H-2*pad)); ctx.stroke();
+    });
+    ctx.fillStyle='#8494b8'; ctx.font='9px monospace';
+    ctx.fillText('0°',pad-4,H-pad+10); ctx.fillText('90°',W-pad-12,H-pad+10);
+    ctx.fillText('1.0',2,pad+4); ctx.fillText('0.0',2,H-pad+4);
+    const xv=a=>pad+(a/90)*(W-2*pad), yv=f=>H-pad-f*(H-2*pad);
+    [[0.04,'#00c8ff',lang==='ru'?'Диэл (F0=0.04)':'Diel (F0=0.04)'],
+     [0.5,'#ff7a45',lang==='ru'?'Металл (F0=0.5)':'Metal (F0=0.5)'],
+     [0.9,'#ffc234',lang==='ru'?'Металл (F0=0.9)':'Metal (F0=0.9)']].forEach(([f0,col,lbl])=>{
+      ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+      for(let a=0;a<=90;a++){ctx.lineTo(xv(a),yv(schlick(f0,Math.cos(a*Math.PI/180))));}
+      ctx.stroke();
+      const curA=angle*Math.PI/180, curF=schlick(f0,Math.cos(curA));
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(xv(angle),yv(curF),4,0,Math.PI*2); ctx.fill();
+    });
+    ctx.strokeStyle='#ffffff33'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(xv(angle),pad); ctx.lineTo(xv(angle),H-pad); ctx.stroke();
+    ctx.setLineDash([]);
+  },[angle,lang]);
+  return(<div>
+    <canvas ref={canvasRef} width={320} height={200} style={{borderRadius:8,border:`1px solid ${C.border}`}}/>
+    <div style={{marginTop:8}}>
+      <div style={{fontFamily:'monospace',fontSize:10,color:C.muted,marginBottom:4}}>
+        {lang==='ru'?`Угол взгляда: ${angle}°`:`View angle: ${angle}°`}
+      </div>
+      <input type="range" min={0} max={90} value={angle} onChange={e=>setAngle(+e.target.value)} style={{width:320,accentColor:C.accent}}/>
+    </div>
+    <div style={{display:'flex',gap:8,marginTop:8,flexWrap:'wrap'}}>
+      {[[0.04,'#00c8ff',lang==='ru'?'Диэлектрик':'Dielectric'],[0.5,'#ff7a45',lang==='ru'?'Металл (ср)':'Metal (mid)'],[0.9,'#ffc234',lang==='ru'?'Металл (Au/Cu)':'Metal (Au/Cu)']].map(([f0,col,lbl])=>(
+        <div key={lbl} style={{background:col+'12',border:`1px solid ${col}44`,borderRadius:6,padding:'5px 10px'}}>
+          <div style={{fontFamily:'monospace',fontSize:10,color:col}}>{lbl}</div>
+          <div style={{fontFamily:'monospace',fontSize:12,color:C.text}}>{schlick(f0,Math.cos(angle*Math.PI/180)).toFixed(3)}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{marginTop:8,background:'#111827',border:`1px solid ${C.border}`,borderRadius:6,padding:'8px 10px',fontSize:11,color:C.muted}}>
+      {lang==='ru'?'При 90° (граничный угол) все поверхности отражают 100% света — Fresnel.':'At 90° (grazing angle) all surfaces reflect 100% of light — Fresnel.'}
+    </div>
+  </div>);
+}
+
+function ChannelPackingViz(){
+  const lang=useLang();
+  const [showChannel,setShowChannel]=useState('all');
+  const channels=[
+    {id:'r',label:'R',color:'#ff5566',ru:'Roughness',en:'Roughness',desc:{ru:'0=гладкий, 1=матовый',en:'0=smooth, 1=rough'}},
+    {id:'g',label:'G',color:'#3dff90',ru:'Metallic',en:'Metallic',desc:{ru:'0=диэлектрик, 1=металл',en:'0=dielectric, 1=metal'}},
+    {id:'b',label:'B',color:'#00c8ff',ru:'AO',en:'AO',desc:{ru:'Ambient Occlusion',en:'Ambient Occlusion'}},
+    {id:'a',label:'A',color:'#ffc234',ru:'Emissive Mask',en:'Emissive Mask',desc:{ru:'Маска свечения',en:'Emissive mask'}},
+  ];
+  const gradient=(col)=>`linear-gradient(to bottom right, ${col}99, ${col}22, #0d1117)`;
+  return(<div>
+    <div style={{display:'flex',gap:4,marginBottom:12,flexWrap:'wrap'}}>
+      {[{id:'all',label:lang==='ru'?'Все каналы':'All channels',col:C.muted},...channels.map(c=>({id:c.id,label:c.label,col:c.color}))].map(btn=>(
+        <button key={btn.id} onClick={()=>setShowChannel(btn.id)}
+          style={{background:showChannel===btn.id?btn.col+'22':'transparent',border:`1px solid ${showChannel===btn.id?btn.col:C.border}`,
+          borderRadius:5,padding:'3px 10px',color:showChannel===btn.id?btn.col:C.muted,fontFamily:'monospace',fontSize:11,cursor:'pointer'}}>
+          {btn.label}
+        </button>
+      ))}
+    </div>
+    <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+        {channels.map(ch=>(<div key={ch.id} style={{
+          width:72,height:72,borderRadius:6,
+          background:gradient(ch.color),
+          border:`2px solid ${(showChannel==='all'||showChannel===ch.id)?ch.color:C.border}`,
+          opacity:(showChannel==='all'||showChannel===ch.id)?1:0.3,
+          display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+          transition:'all 0.2s',
+        }}>
+          <div style={{fontFamily:'monospace',fontSize:16,color:ch.color,fontWeight:700}}>{ch.label}</div>
+          <div style={{fontFamily:'monospace',fontSize:9,color:'white',textAlign:'center',padding:'0 4px',lineHeight:1.3}}>
+            {lang==='ru'?ch.ru:ch.en}
+          </div>
+        </div>))}
+      </div>
+      <div style={{fontSize:20,color:C.accent}}>→</div>
+      <div style={{
+        width:120,height:120,borderRadius:8,
+        background:`conic-gradient(${channels[0].color+'aa'} 0% 25%, ${channels[1].color+'aa'} 25% 50%, ${channels[2].color+'aa'} 50% 75%, ${channels[3].color+'aa'} 75% 100%)`,
+        border:`2px solid ${C.accent}`,
+        display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+      }}>
+        <div style={{fontFamily:'monospace',fontSize:11,color:'white',fontWeight:700,textShadow:'0 0 6px black'}}>RGBA</div>
+        <div style={{fontFamily:'monospace',fontSize:9,color:'white',textShadow:'0 0 4px black'}}>1 texture</div>
+        <div style={{fontFamily:'monospace',fontSize:9,color:C.green,fontWeight:700}}>1 sample</div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        <div style={{background:C.red+'12',border:`1px solid ${C.red}44`,borderRadius:6,padding:'6px 10px',fontFamily:'monospace',fontSize:11,color:C.red}}>
+          {lang==='ru'?'Без packing: 4 samples':'Without packing: 4 samples'}
+        </div>
+        <div style={{background:C.green+'12',border:`1px solid ${C.green}44`,borderRadius:6,padding:'6px 10px',fontFamily:'monospace',fontSize:11,color:C.green}}>
+          {lang==='ru'?'Channel packed: 1 sample':'Channel packed: 1 sample'}
+        </div>
+        <div style={{background:C.accent+'12',border:`1px solid ${C.accent}44`,borderRadius:6,padding:'6px 10px',fontFamily:'monospace',fontSize:10,color:C.accent}}>
+          {lang==='ru'?'Экономия: 4× меньше cache miss':'Save: 4× fewer cache miss'}
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+function ShadowCascadesViz(){
+  const lang=useLang();
+  const [selected,setSelected]=useState(0);
+  const cascades=[
+    {idx:0,label:'CSM 0',col:'#ff5566',ru:'Ближняя зона. Высокое разрешение (4096²). Детальные мягкие тени. ~0-20м от камеры.',en:'Near zone. High resolution (4096²). Detailed soft shadows. ~0-20m from camera.'},
+    {idx:1,label:'CSM 1',col:'#ff7a45',ru:'Средняя зона. Среднее разрешение (2048²). Меньше деталей. ~20-50м.',en:'Mid zone. Medium resolution (2048²). Less detail. ~20-50m.'},
+    {idx:2,label:'CSM 2',col:'#ffc234',ru:'Дальняя зона. Низкое разрешение (1024²). Угловатые тени. ~50-100м.',en:'Far zone. Low resolution (1024²). Blocky shadows. ~50-100m.'},
+    {idx:3,label:'CSM 3',col:'#8494b8',ru:'Очень дальняя. Очень низкое (512²) или дистанц. поле теней. > 100м.',en:'Very far. Very low res (512²) or distance field shadows. > 100m.'},
+  ];
+  return(<div>
+    <div style={{background:'#0d1117',border:`1px solid ${C.border}`,borderRadius:8,padding:16,marginBottom:12}}>
+      {/* Top-down frustum view */}
+      <svg viewBox="0 0 400 180" style={{width:'100%',maxWidth:400}}>
+        {/* Camera */}
+        <polygon points="20,90 0,70 0,110" fill={C.accent} opacity={0.8}/>
+        <text x={24} y={95} fill={C.muted} fontSize={10} fontFamily="monospace">CAM</text>
+        {/* Cascade zones */}
+        {[
+          {x1:40,y1:80,x2:100,y2:75,x3:100,y3:105,x4:40,y4:100,col:'#ff5566'},
+          {x1:100,y1:75,x2:180,y2:60,x3:180,y3:120,x4:100,y4:105,col:'#ff7a45'},
+          {x1:180,y1:60,x2:280,y2:40,x3:280,y3:140,x4:180,y4:120,col:'#ffc234'},
+          {x1:280,y1:40,x2:400,y2:10,x3:400,y3:170,x4:280,y4:140,col:'#8494b888'},
+        ].map((z,i)=>(<g key={i} onClick={()=>setSelected(i)} style={{cursor:'pointer'}}>
+          <polygon points={`${z.x1},${z.y1} ${z.x2},${z.y2} ${z.x3},${z.y3} ${z.x4},${z.y4}`}
+            fill={z.col} opacity={selected===i?0.7:0.3} stroke={selected===i?z.col:'transparent'} strokeWidth={1}/>
+          <text x={(z.x1+z.x2)/2} y={90} fill="white" fontSize={10} fontFamily="monospace" textAnchor="middle"
+            opacity={selected===i?1:0.6}>{i}</text>
+        </g>))}
+        {/* Distance markers */}
+        {[[100,'20m'],[180,'50m'],[280,'100m']].map(([x,label])=>(<g key={label}>
+          <line x1={x} y1={20} x2={x} y2={160} stroke={C.border} strokeDasharray="3,3"/>
+          <text x={x} y={15} fill={C.muted} fontSize={9} fontFamily="monospace" textAnchor="middle">{label}</text>
+        </g>))}
+      </svg>
+    </div>
+    <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:8}}>
+      {cascades.map(c=>(<button key={c.idx} onClick={()=>setSelected(c.idx)}
+        style={{background:selected===c.idx?c.col+'22':'transparent',border:`1px solid ${selected===c.idx?c.col:C.border}`,
+        borderRadius:5,padding:'3px 10px',color:selected===c.idx?c.col:C.muted,fontFamily:'monospace',fontSize:11,cursor:'pointer'}}>
+        {c.label}
+      </button>))}
+    </div>
+    <div style={{background:cascades[selected].col+'12',border:`1px solid ${cascades[selected].col}44`,borderRadius:8,padding:'10px 14px',fontSize:12,color:C.muted,lineHeight:1.6}}>
+      {lang==='ru'?cascades[selected].ru:cascades[selected].en}
+    </div>
+  </div>);
+}
+
+function OptimizationFlowViz(){
+  const lang=useLang();
+  const [path,setPath]=useState([]);
+  const t=(ru,en)=>lang==='ru'?ru:en;
+  const tree={
+    id:'start',
+    label:t('Сцена тормозит','Scene is slow'),
+    col:C.red,
+    question:t('stat Unit → что дольше?','stat Unit → which is longer?'),
+    options:[
+      {label:'GPU > CPU',col:C.accent,next:{
+        id:'gpu',label:t('GPU-bound','GPU-bound'),col:C.accent,
+        question:t('profilegpu → какой pass?','profilegpu → which pass?'),
+        options:[
+          {label:t('Base Pass дорогой','Base Pass expensive'),col:C.orange,next:{
+            id:'basepass',label:t('Сложные материалы','Complex materials'),col:C.orange,
+            solutions:[t('viewmode ShaderComplexity','viewmode ShaderComplexity'),t('Material Stats → instruction count','Material Stats → instruction count'),t('Channel packing, убрать samples','Channel packing, remove samples')]
+          }},
+          {label:t('Много draw calls','Many draw calls'),col:C.yellow,next:{
+            id:'drawcalls',label:t('CPU feed problem','CPU feed problem'),col:C.yellow,
+            solutions:['HISM / Nanite',t('Batching одинаковых мешей','Batch identical meshes'),t('Merge Static Meshes','Merge Static Meshes')]
+          }},
+          {label:t('Translucency дорогая','Translucency expensive'),col:C.purple,next:{
+            id:'transp',label:t('Overdraw / Forward','Overdraw / Forward'),col:C.purple,
+            solutions:[t('Заменить Masked где можно','Replace with Masked where possible'),t('viewmode QuadOverdraw','viewmode QuadOverdraw'),t('Уменьшить размер спрайтов частиц','Reduce particle sprite sizes')]
+          }},
+        ]
+      }},
+      {label:'CPU > GPU',col:C.orange,next:{
+        id:'cpu',label:t('CPU-bound','CPU-bound'),col:C.orange,
+        question:t('stat game → что?','stat game → what?'),
+        options:[
+          {label:t('Много Blueprint Tick','Many Blueprint Ticks'),col:C.yellow,next:{
+            id:'tick',label:t('Tick overhead','Tick overhead'),col:C.yellow,
+            solutions:[t('Delegates вместо Tick','Delegates instead of Tick'),t('SetActorTickInterval(0.1)','SetActorTickInterval(0.1)'),t('Tick Browser → найти худших','Tick Browser → find worst')]
+          }},
+          {label:t('Много draw calls','Many draw calls'),col:C.green,next:{
+            id:'cpudc',label:t('CPU draw overhead','CPU draw overhead'),col:C.green,
+            solutions:['Instancing (ISM/HISM)',t('Batching','Batching'),t('stat scenerendering → DrawCallsCount','stat scenerendering → DrawCallsCount')]
+          }},
+        ]
+      }},
+    ]
+  };
+  const getNode=(node,path)=>{
+    let cur=node;
+    for(const step of path){
+      const opt=cur.options?.find(o=>o.label===step);
+      if(opt)cur=opt.next; else break;
+    }
+    return cur;
+  };
+  const cur=getNode(tree,path);
+  return(<div>
+    <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center',marginBottom:12}}>
+      <div style={{background:C.red+'22',border:`1px solid ${C.red}`,borderRadius:6,padding:'4px 10px',fontFamily:'monospace',fontSize:11,color:C.red,cursor:'pointer'}}
+        onClick={()=>setPath([])}>
+        {t('↩ Начать','↩ Start')}
+      </div>
+      {path.map((step,i)=>(<div key={i} style={{display:'flex',alignItems:'center',gap:4}}>
+        <span style={{color:C.muted}}>›</span>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:'4px 10px',fontFamily:'monospace',fontSize:10,color:C.muted,cursor:'pointer'}}
+          onClick={()=>setPath(path.slice(0,i))}>
+          {step}
+        </div>
+      </div>))}
+    </div>
+    <div style={{background:cur.col+'12',border:`2px solid ${cur.col}66`,borderRadius:10,padding:'14px 16px',marginBottom:12}}>
+      <div style={{fontFamily:'monospace',fontSize:13,color:cur.col,fontWeight:700,marginBottom:4}}>{cur.label}</div>
+      {cur.question&&<div style={{fontSize:12,color:C.muted}}>{cur.question}</div>}
+      {cur.solutions&&<ul style={{margin:'8px 0 0 0',paddingLeft:16}}>
+        {cur.solutions.map(s=>(<li key={s} style={{fontSize:12,color:C.text,lineHeight:1.7,fontFamily:'monospace'}}>{s}</li>))}
+      </ul>}
+    </div>
+    {cur.options&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+      {cur.options.map(opt=>(<button key={opt.label} onClick={()=>setPath([...path,opt.label])}
+        style={{background:opt.col+'15',border:`1px solid ${opt.col}66`,borderRadius:8,padding:'8px 14px',
+        color:opt.col,fontFamily:'monospace',fontSize:11,cursor:'pointer',textAlign:'left',transition:'all 0.15s',
+        flex:1,minWidth:140}}>
+        {opt.label} <span style={{opacity:0.5}}>›</span>
+      </button>))}
+    </div>}
+  </div>);
+}
+
+function VRAMBudgetViz(){
+  const lang=useLang();
+  const [budget,setBudget]=useState(8192);
+  const items=[
+    {label:'Textures',ruLabel:'Текстуры',col:'#00c8ff',pct:58},
+    {label:'Render Targets',ruLabel:'Render Targets',col:'#ff7a45',pct:12},
+    {label:'Meshes',ruLabel:'Меши',col:'#3dff90',pct:10},
+    {label:'Shaders',ruLabel:'Шейдеры',col:'#c084fc',pct:8},
+    {label:'G-Buffer',ruLabel:'G-Buffer',col:'#ffc234',pct:7},
+    {label:'Other',ruLabel:'Прочее',col:'#8494b8',pct:5},
+  ];
+  const total=budget;
+  return(<div>
+    <div style={{marginBottom:12}}>
+      <div style={{fontFamily:'monospace',fontSize:10,color:C.muted,marginBottom:4}}>
+        {lang==='ru'?`VRAM бюджет: ${budget}MB (${(budget/1024).toFixed(1)}GB)`:`VRAM budget: ${budget}MB (${(budget/1024).toFixed(1)}GB)`}
+      </div>
+      <input type="range" min={2048} max={16384} step={1024} value={budget} onChange={e=>setBudget(+e.target.value)}
+        style={{width:'100%',accentColor:C.accent}}/>
+      <div style={{display:'flex',justifyContent:'space-between',fontFamily:'monospace',fontSize:9,color:C.dim,marginTop:2}}>
+        <span>2GB</span><span>4GB</span><span>8GB</span><span>12GB</span><span>16GB</span>
+      </div>
+    </div>
+    {/* Bar */}
+    <div style={{display:'flex',height:32,borderRadius:6,overflow:'hidden',marginBottom:12,border:`1px solid ${C.border}`}}>
+      {items.map(item=>(<div key={item.label} title={`${item.label}: ${Math.round(total*item.pct/100)}MB`}
+        style={{width:`${item.pct}%`,background:item.col+'aa',transition:'width 0.3s',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <span style={{fontFamily:'monospace',fontSize:9,color:'white',fontWeight:700,textShadow:'0 0 4px black'}}>
+          {item.pct>8?item.pct+'%':''}
+        </span>
+      </div>))}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+      {items.map(item=>(<div key={item.label} style={{display:'flex',alignItems:'center',gap:8,background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:'6px 10px'}}>
+        <div style={{width:10,height:10,borderRadius:2,background:item.col,flexShrink:0}}/>
+        <div style={{flex:1}}>
+          <div style={{fontFamily:'monospace',fontSize:11,color:item.col}}>{lang==='ru'?item.ruLabel:item.label}</div>
+          <div style={{fontFamily:'monospace',fontSize:10,color:C.muted}}>{Math.round(total*item.pct/100)}MB ({item.pct}%)</div>
+        </div>
+      </div>))}
+    </div>
+    <div style={{marginTop:8,background:'#111827',border:`1px solid ${C.border}`,borderRadius:6,padding:'8px 10px',fontSize:11,color:C.muted}}>
+      {lang==='ru'?'Текстуры — всегда главный потребитель VRAM. Оптимизация текстур = наибольший эффект.':'Textures are always the biggest VRAM consumer. Texture optimization = biggest impact.'}
+    </div>
+  </div>);
+}
+
 // ══ TABS & APP ═════════════════════════════════════════════════════════════
 const TABS=[
   {id:"linalg",icon:"∇",ready:true},
@@ -3188,7 +3725,19 @@ export default function App(){
               tabsEn={{"Why":"Each operation is convenient in its own space. Mesh in Model Space (editor). Physics/lighting in World Space (unified). View Space (camera-relative). Clip Space (GPU rasterization).","Analogy":"You're in a city (World Space). House on a map = Model Space. GPS = View Space. Phone screen = Clip Space. Different systems for different tasks, all describing the same point.","In Interview":"Model→World: × Model Matrix. World→View: × View Matrix (inverse camera). View→Clip: × Projection Matrix. Clip→NDC: ÷ w. NDC→Screen: Viewport. VS must output SV_Position in Clip Space."}}/>
               <CoordSpaces/>
             </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"lerp · inverse lerp · remap":"lerp · inverse lerp · remap"} tag="math">
+            <LearnCard tabs={{"Суть":"lerp(A,B,t) = A*(1-t)+B*t. При t=0 → A, t=1 → B. Inverse lerp: по значению найти t = (x-A)/(B-A). Remap: сначала inverse lerp, потом lerp — перевести из диапазона [A,B] в [C,D].","Аналогия":"lerp — регулятор громкости 0→1. Remap — конвертировать °C в °F: диапазон [0,100] → [32,212]. Та же математика.","На интервью":`Рабочий remap: float remap(float x, float a, float b, float c, float d){ return lerp(c, d, saturate((x-a)/(b-a))); }. Применения: HP 0..100 → UV 0..1 для health bar, distance 0..maxDist → alpha 0..1 для fog, temperature → color gradient.`}}
+            tabsEn={{"Core Idea":"lerp(A,B,t) = A*(1-t)+B*t. At t=0 → A, t=1 → B. Inverse lerp: find t from a value = (x-A)/(B-A). Remap: inverse lerp then lerp — translate from range [A,B] to [C,D].","Analogy":"lerp = volume knob 0→1. Remap = convert C to F: range [0,100] → [32,212]. Same math.","In Interview":`Working remap: float remap(float x, float a, float b, float c, float d){ return lerp(c, d, saturate((x-a)/(b-a))); }. Uses: HP 0..100 → UV 0..1 for health bar, distance → alpha for fog, temperature → color gradient.`}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"smoothstep · step · frac/floor для паттернов":"smoothstep · step · frac/floor for Patterns"} tag="math">
+            <LearnCard tabs={{"Суть":"step(edge,x) = 0 если x<edge, 1 если ≥edge. Без branching. smoothstep(a,b,x) = S-кривая. frac(x) = дробная часть (0.7 → 0.7, 1.7 → 0.7). floor(x) = целая часть. frac(UV*N) создаёт N повторений паттерна.","Аналогия":"step = выключатель (0 или 1). smoothstep = диммер (плавный). frac = будильник: 0:00 → 1:00 → 0:00 (всегда 0..1).","На интервью":`Anti-aliased step: float fw=fwidth(x); smoothstep(edge-fw, edge+fw, x). Checkerboard: step(0.5, frac((floor(uv.x*N)+floor(uv.y*N))*0.5)). Stripes: step(0.5, frac(uv.x*N)). Sin wave: sin(uv.x*PI*freq)*0.5+0.5. Все = нулевые texture samples.`}}
+            tabsEn={{"Core Idea":"step(edge,x) = 0 if x<edge, 1 if ≥edge. No branching. smoothstep(a,b,x) = S-curve. frac(x) = fractional part (0.7→0.7, 1.7→0.7). floor(x) = integer part. frac(UV*N) creates N pattern repetitions.","Analogy":"step = light switch (0 or 1). smoothstep = dimmer (gradual). frac = alarm clock: 0:00 → 1:00 → 0:00 (always 0..1).","In Interview":`Anti-aliased step: float fw=fwidth(x); smoothstep(edge-fw, edge+fw, x). Checkerboard: step(0.5, frac((floor(uv.x*N)+floor(uv.y*N))*0.5)). Stripes: step(0.5, frac(uv.x*N)). Sin wave: sin(uv.x*PI*freq)*0.5+0.5. All = zero texture samples.`}}/>
+                        <CurvesViz/>
+</Section>
+
+    </>)}
 
         {active==="gpu"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.orange,letterSpacing:3,marginBottom:4}}>{T[lang].mods.gpu}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.gpu}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.gpu}</p></div>
@@ -3197,7 +3746,9 @@ export default function App(){
                 "Суть":"CPU оптимизирован для <b style='color:#ff7a45'>последовательного</b> выполнения сложных инструкций — большой кэш, предсказание ветвлений, out-of-order execution. GPU оптимизирован для <b style='color:#00c8ff'>параллельного</b> выполнения простых операций над огромным количеством данных одновременно.",
                 "Аналогия":"CPU — 8 профессоров, каждый решает сложную задачу. GPU — 10 000 студентов, каждый считает простое уравнение. Рендеринг — это 'посчитай цвет для каждого из 2 миллионов пикселей'. Студенты справятся быстрее, даже если каждый медленнее профессора.",
                 "На интервью":`GPU использует SIMT (Single Instruction Multiple Threads) — один шейдер выполняется на тысячах потоков одновременно, каждый обрабатывает свой пиксель или вершину. Это работает потому что шейдеры не имеют зависимостей между потоками. GPU не заменяет CPU: игровая логика последовательна — physics solver, AI, Blueprint — всё это цепочки зависимых вычислений.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"CPU is optimized for <b style='color:#ff7a45'>sequential</b> execution — large cache, branch prediction, out-of-order. GPU is optimized for <b style='color:#00c8ff'>parallel</b> execution of simple ops on massive amounts of data simultaneously.","Analogy":"CPU = 8 professors, each solving a complex problem. GPU = 10,000 students computing simple equations. Rendering = 'compute color for 2M pixels'. Students win even if each one is slower.","In Interview":`GPU uses <b style='color:#ffc234'>SIMT</b> (Single Instruction Multiple Threads) — one shader on thousands of threads simultaneously. Works because shaders have no inter-thread dependencies. GPU doesn't replace CPU: game logic is sequential — physics, AI, Blueprint = chains of dependent computations.`}}/>
+
               <CoreDiagram/><InfoBox label={lang==='ru'?"КЛЮЧЕВОЕ ОТЛИЧИЕ":"KEY DIFFERENCE"} color={C.orange}>{lang==='ru'?<><strong style={{color:C.text}}>CPU</strong> — несколько мощных ядер, большой кэш, сложная логика управления. Для последовательного кода с ветвлениями.<br/><strong style={{color:C.text}}>GPU</strong> — тысячи простых ядер. Каждое слабее CPU-ядра, но все параллельны.<br/><br/><span style={{color:C.yellow}}>GPU не заменяет CPU:</span> игровая логика последовательна.</>:<><strong style={{color:C.text}}>CPU</strong> — few powerful cores, large cache, complex control logic. Optimized for sequential code with branches.<br/><strong style={{color:C.text}}>GPU</strong> — thousands of simple cores. Each weaker than CPU, but all parallel. Ideal for applying one shader to millions of pixels.<br/><br/><span style={{color:C.yellow}}>GPU doesn't replace CPU:</span> game logic is sequential — next frame depends on previous result.</>}</InfoBox></Section>
           <Section title="GPU Rendering Pipeline" tag="pipeline">
               <LearnCard tabs={{
@@ -3226,7 +3777,24 @@ export default function App(){
               tabsEn={{"Core Idea":"Draw call = CPU command to GPU: draw this mesh. Problem is not drawing — it's the <b style='color:#ff7a45'>preparation overhead</b>: shader swap, texture bind, constant buffer update.","Why":"Mobile: ~500-2000 calls/frame. Desktop: ~5000-15000. Exceed it = CPU can't feed GPU, FPS drops — GPU-idle CPU-bound scenario.","In Interview":"Batching: same-material meshes → 1 call. Instancing (ISM/HISM): 1000 trees = 1 call with transform array. Atlasing: fewer state changes. Nanite bypasses via GPU indirect draws."}}/>
               <DrawCallExplainer/>
             </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"GPU Memory · Bandwidth · Cache Locality":"GPU Memory · Bandwidth · Cache Locality"} tag="★ deep">
+            <LearnCard tabs={{"Суть":"GPU память: VRAM (быстрая, GB), System RAM (медленная, GB). Bandwidth = скорость передачи данных между GPU cores и VRAM. Cache hierarchy: L1 cache (per SM, ~32KB, быстро), L2 cache (shared, ~4MB), VRAM (медленно). Cache miss = ждать данные из VRAM = stall сотни тактов.","На интервью":`Texture sampling cache locality: если соседние пиксели читают соседние тексели — cache hit (быстро). Случайный доступ к большой текстуре = cache miss (медленно). Это почему: 1) Channel packing важен (одна текстура в кэше vs четыре). 2) Texture size влияет на cache. 3) mip maps ускоряют — маленький mip = всё в кэше. Bandwidth bottleneck: большие текстуры без mip, много G-Buffer outputs, high resolution render. Проверить: RenderDoc → GPU timing vs bandwidth.`,"Аналогия":"VRAM = склад за городом. L1 Cache = рабочий стол. Взять файл со склада = долго (cache miss). Взять с рабочего стола = мгновенно (cache hit). Mip maps = хранить часто нужные данные на рабочем столе."}}
+            tabsEn={{"Core Idea":"GPU memory: VRAM (fast, GB), System RAM (slow, GB). Bandwidth = data transfer speed between GPU cores and VRAM. Cache hierarchy: L1 cache (per SM, ~32KB, fast), L2 cache (shared, ~4MB), VRAM (slow). Cache miss = wait for data from VRAM = stall hundreds of cycles.","In Interview":`Texture sampling cache locality: adjacent pixels reading adjacent texels = cache hit (fast). Random access to large texture = cache miss (slow). Why: 1) Channel packing matters (one texture in cache vs four). 2) Texture size affects cache. 3) Mip maps help — small mip = everything fits in cache. Bandwidth bottleneck: large textures without mips, many G-Buffer outputs, high resolution. Check: RenderDoc → GPU timing vs bandwidth.`,"Analogy":"VRAM = warehouse across town. L1 Cache = desk. Getting file from warehouse = slow (cache miss). From desk = instant (cache hit). Mip maps = keep frequently needed data on your desk."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Warp · Occupancy · Compute Shader basics":"Warp · Occupancy · Compute Shader Basics"} tag="deep">
+            <LearnCard tabs={{"Суть":"Warp (NVIDIA) / Wavefront (AMD) = группа из 32-64 потоков выполняющих одну инструкцию. Occupancy = насколько SM (Streaming Multiprocessor) занят активными warpами. Высокая occupancy позволяет скрывать latency. Compute Shader = программируемый kernel без рендеринга.","На интервью":`Occupancy ограничивается: регистрами per thread (больше регистров = меньше warps в SM), shared memory (больше = меньше warps), warp размером. Latency hiding: пока один warp ждёт memory → SM переключается на другой warp. Для этого нужны активные warps → высокая occupancy. Compute Shader в UE5: Shader Plugin, RDG (Render Dependency Graph), используются для: Niagara GPU, physics simulation, custom post-process, procedural generation. Dispatch(GroupX, GroupY, GroupZ) с THREADS_PER_GROUP.`,"Зачем":"Понимание occupancy объясняет почему: маленькие шейдеры с малым числом регистров быстрее на GPU. Divergent branches снижают occupancy. Texture fetch latency скрыт высокой occupancy."}}
+            tabsEn={{"Core Idea":"Warp (NVIDIA) / Wavefront (AMD) = group of 32-64 threads executing one instruction. Occupancy = how busy a SM (Streaming Multiprocessor) is with active warps. High occupancy enables latency hiding. Compute Shader = programmable kernel without rendering.","In Interview":`Occupancy limited by: registers per thread (more registers = fewer warps in SM), shared memory (more = fewer warps), warp size. Latency hiding: while one warp waits for memory → SM switches to another warp. Requires active warps → high occupancy. Compute Shader in UE5: Shader Plugin, RDG (Render Dependency Graph), used for: Niagara GPU, physics simulation, custom post-process, procedural generation. Dispatch(GroupX, GroupY, GroupZ) with THREADS_PER_GROUP.`,"Why":"Understanding occupancy explains why: small shaders with few registers are faster on GPU. Divergent branches reduce occupancy. Texture fetch latency is hidden by high occupancy."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Compute Shaders в UE5 — RDG · Niagara · Custom":"Compute Shaders in UE5 — RDG · Niagara · Custom"} tag="advanced">
+            <LearnCard tabs={{"Суть":"Compute Shader = программируемый GPU kernel без рендеринга. Работает напрямую с буферами данных. В UE5: Niagara GPU emitter = compute shader. Custom compute = через RDG (Render Dependency Graph) или Global Shader framework.","На интервью":`RDG (Render Dependency Graph): современный способ добавить custom render pass. FRDGBuilder → AddPass → лямбда с RHI commands. Автоматическое resource tracking. Niagara GPU Simulation Stage = custom compute для частиц. Scratch Pad module = HLSL прямо в Niagara Editor. Глобальный Shader: IMPLEMENT_GLOBAL_SHADER macro, TShaderMapRef. Dispatch(GroupX, GroupY, GroupZ). Один thread group обычно 64 threads (8x8 или 64x1). Compute vs VS/PS: нет rasterization overhead, работает с arbitrary buffers (не только render targets), идеально для physics, simulation, procedural generation.`,"Зачем":"Compute shader = единственный способ запустить parallel GPU computation без рендеринга. Niagara GPU = миллионы частиц через compute. Custom post-process c произвольными буферами = compute. Terrain generation = compute."}}
+            tabsEn={{"Core Idea":"Compute Shader = programmable GPU kernel without rendering. Works directly with data buffers. In UE5: Niagara GPU emitter = compute shader. Custom compute = via RDG (Render Dependency Graph) or Global Shader framework.","In Interview":`RDG (Render Dependency Graph): modern way to add custom render pass. FRDGBuilder → AddPass → lambda with RHI commands. Automatic resource tracking. Niagara GPU Simulation Stage = custom compute for particles. Scratch Pad module = HLSL directly in Niagara Editor. Global Shader: IMPLEMENT_GLOBAL_SHADER macro, TShaderMapRef. Dispatch(GroupX, GroupY, GroupZ). One thread group usually 64 threads (8x8 or 64x1). Compute vs VS/PS: no rasterization overhead, works with arbitrary buffers (not just render targets), ideal for physics, simulation, procedural generation.`,"Why":"Compute shader = only way to run parallel GPU computation without rendering. Niagara GPU = millions of particles via compute. Custom post-process with arbitrary buffers = compute. Terrain generation = compute."}}/>
+          </Section>
+
+    </>)}
 
         {active==="hlsl"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.purple,letterSpacing:3,marginBottom:4}}>{T[lang].mods.hlsl}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.hlsl}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.hlsl}</p></div>
@@ -3286,7 +3854,25 @@ float4 main(PSInput IN) : SV_Target {
               tabsEn={{"Why":"Normal map adds visual detail without more polygons. Normals stored in <b style='color:#ffc234'>Tangent Space</b> must be converted to World Space for lighting.","Core Idea":"TBN matrix = surface coordinate system. T=along UV.x, B=along UV.y, N=perpendicular. Texture normal × TBN = World Space normal.","In Interview":"Bluish (0.5,0.5,1.0) = (0,0,1) = straight perpendicular. Build TBN from vertex tangent/bitangent/normal. worldN=mul(tangentN,TBN). Bitangent=cross(N,T) with W-component sign."}}/>
               <NormalMappingExplainer/>
             </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"ddx · ddy · fwidth — экранные производные":"ddx · ddy · fwidth — Screen-Space Derivatives"} tag="★ advanced">
+            <LearnCard tabs={{"Суть":"ddx(x)/ddy(x) — насколько x меняется от пикселя к соседнему по X/Y. GPU вычисляет через разницу в 2×2 блоке. fwidth(x) = abs(ddx(x))+abs(ddy(x)). Только в Pixel Shader — в VS/CS нет соседних пикселей.","Зачем":"Sample() использует ddx/ddy для автоматического mip. fwidth = размер одного пикселя → anti-aliased mask. Без fwidth: step(0.5,mask) = зазубренный край. С fwidth: smoothstep(0.5-fw, 0.5+fw, mask) = 1 сглаженный пиксель.","На интервью":`В VS нельзя Sample() — нет ddx/ddy. Используй SampleLevel(tex,uv,mip). Anti-aliased mask: float fw=fwidth(mask); return smoothstep(0.5-fw, 0.5+fw, mask). UE5: Anti-aliased Mask нод. ddx/ddy медленны на мобайл. SampleGrad(tex,uv,ddx(uv),ddy(uv)) = явные производные для кастомного mip.`}}
+            tabsEn={{"Core Idea":"ddx(x)/ddy(x) = how much x changes to the adjacent pixel along X/Y. GPU computes via difference in 2×2 block. fwidth(x) = abs(ddx(x))+abs(ddy(x)). Pixel Shader only — VS/CS have no adjacent pixels.","Why":"Sample() uses ddx/ddy for automatic mip selection. fwidth = size of one pixel → anti-aliased mask edge. Without fwidth: step(0.5,mask) = jagged edge. With fwidth: smoothstep(0.5-fw, 0.5+fw, mask) = 1 smooth pixel.","In Interview":`Cannot Sample() in VS — no ddx/ddy. Use SampleLevel(tex,uv,mip). Anti-aliased mask: float fw=fwidth(mask); return smoothstep(0.5-fw, 0.5+fw, mask). UE5: Anti-aliased Mask node. ddx/ddy slow on mobile. SampleGrad(tex,uv,ddx(uv),ddy(uv)) = explicit derivatives for custom mip.`}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Branch Divergence · Shader Permutations":"Branch Divergence · Shader Permutations"} tag="★ advanced">
+            <LearnCard tabs={{"Суть":"Branch Divergence: GPU запускает потоки группами (warp=32-64). Все потоки выполняют одну инструкцию. if/else с разными путями = GPU выполняет ОБЕ ветви для всей группы. Результат: 2× стоимость. Permutation = отдельно скомпилированная версия шейдера на каждую комбинацию Static Switches.","На интервью":`Вместо if(x>0) используй lerp(a, b, step(0,x)). clip()/discard тоже скрытый branch. Если все 32 потока идут в одну ветвь — бесплатно (coherent branch). Static Switch = permutation = zero рантаймовый overhead (выбранная ветвь hard-coded). Scalar Parameter = один шейдер + constant buffer. 3 Static Switches = 2³=8 permutations. PSO explosion — следи за количеством Static Switches.`,"Зачем":"Branch divergence — главная причина почему GPU не любят if/else в PS. Coherent branches (все потоки одинаково) бесплатны. Permutations — трейдоф: ноль рантайм vs размер пакета."}}
+            tabsEn={{"Core Idea":"Branch Divergence: GPU runs threads in groups (warp=32-64). All threads execute one instruction. if/else with different paths = GPU executes BOTH branches for the entire group. Result: 2× cost. Permutation = separately compiled shader version per Static Switch combination.","In Interview":`Instead of if(x>0) use lerp(a, b, step(0,x)). clip()/discard is also a hidden branch. If all 32 threads take same path — free (coherent branch). Static Switch = permutation = zero runtime overhead (chosen branch hard-coded). Scalar Parameter = one shader + constant buffer. 3 Static Switches = 2³=8 permutations. Watch for PSO explosion.`,"Why":"Branch divergence is the main reason GPU dislikes if/else in PS. Coherent branches (all threads same) are free. Permutations = tradeoff: zero runtime vs package size."}}/>
+                        <BranchDivergenceViz/>
+</Section>
+
+  
+          <Section title={lang==='ru'?"Constant Buffers · Custom HLSL Node в UE":"Constant Buffers · Custom HLSL Node in UE"} tag="advanced">
+            <LearnCard tabs={{"Суть":"Constant Buffer (cbuffer) = блок данных передаваемый из CPU в шейдер. Быстрее чем отдельные uniform переменные. Scalar/Vector/Texture параметры материала = constant buffer. Custom HLSL Node в UE5 = вставка сырого HLSL кода напрямую в Material Graph.","На интервью":`Constant Buffer в HLSL: cbuffer MaterialParameters { float4 BaseColor; float Roughness; float Metallic; }. В UE5 все Material Parameters = один cbuffer, обновляется через DMI.SetScalarParameterValue. Обновление cbuffer = дёшево (нет перекомпиляции шейдера). Custom Node в UE5: нод Custom → вписать HLSL код → Inputs = переменные. Пример: normalize(cross(A,B)) → нод с inputs A(float3), B(float3), code="return normalize(cross(A,B));". Используй для: сложной математики которой нет в стандартных нодах, оптимизации (один Custom = меньше нодов), портирования HLSL из другого движка.`,"Зачем":"Scalar Parameter vs Static Switch: Scalar = constant buffer (один шейдер, быстрое обновление). Static Switch = permutation (zero runtime, но дольше cook). Custom Node = bypass ограничений Material Graph, прямой HLSL код."}}
+            tabsEn={{"Core Idea":"Constant Buffer (cbuffer) = data block passed from CPU to shader. Faster than individual uniforms. Scalar/Vector/Texture material parameters = constant buffer. Custom HLSL Node in UE5 = insert raw HLSL code directly into Material Graph.","In Interview":`Constant Buffer in HLSL: cbuffer MaterialParameters { float4 BaseColor; float Roughness; float Metallic; }. In UE5 all Material Parameters = one cbuffer, updated via DMI.SetScalarParameterValue. Updating cbuffer = cheap (no shader recompilation). Custom Node in UE5: Custom node → write HLSL code → Inputs = variables. Example: normalize(cross(A,B)) → node with inputs A(float3), B(float3), code="return normalize(cross(A,B));". Use for: complex math not in standard nodes, optimization (one Custom = fewer nodes), porting HLSL from other engines.`,"Why":"Scalar Parameter vs Static Switch: Scalar = constant buffer (one shader, fast update). Static Switch = permutation (zero runtime, but longer cook). Custom Node = bypass Material Graph limitations, direct HLSL code."}}/>
+          </Section>
+
+    </>)}
 
         {active==="rendering"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.accent,letterSpacing:3,marginBottom:4}}>{T[lang].mods.rendering}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.rendering}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.rendering}</p></div>
@@ -3295,14 +3881,18 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"Forward: для каждого объекта сразу считаем все источники света. N объектов × M источников = N×M проходов. Deferred: сначала рендерим геометрию в G-Buffer (только данные поверхности), потом освещение отдельно. N + M проходов вместо N×M.",
                 "Зачем":"При 100 объектах и 20 источниках света: Forward = 2000 проходов, Deferred = 120. Поэтому все современные движки используют deferred для сложных сцен. Цена — G-Buffer занимает 100-200 MB VRAM и требует широкий bandwidth. Поэтому mobile обычно Forward.",
                 "На интервью":`UE5 использует Deferred по умолчанию. Преимущество: N sources lights стоит N passes вне зависимости от количества материалов. Недостаток: прозрачность не работает нативно (нет depth write в G-Buffer), MSAA дорогой. Translucency в UE5 рендерится отдельным Forward проходом поверх deferred результата.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"Forward: each object calculated with all lights immediately — O(N×M). Deferred: first geometry to G-Buffer, then lighting separately — O(N+M). UE5 uses Deferred by default. Forward is better for mobile and transparency.","Why":"Deferred separates geometry from lighting. N objects + M lights = N+M passes, not N×M. Critical for scenes with dozens of dynamic lights.","In Interview":`G-Buffer stores surface data. Lighting Pass reads it and processes all lights independently. Transparency: can't use G-Buffer — rendered in a separate Forward pass. Mobile: Forward preferred (lower bandwidth). Deferred: unlimited dynamic lights at O(N+M) cost.`}}/>
+
               <DeferredVsForward/><InfoBox label={lang==='ru'?"ПОЧЕМУ UE5 ИСПОЛЬЗУЕТ DEFERRED":"WHY UE5 USES DEFERRED"} color={C.orange}>{lang==='ru'?"Deferred отделяет рендеринг геометрии от расчёта освещения. N объектов + M источников = N + M passes, а не N×M. Критично для уровней с десятками динамических источников.":"Deferred separates geometry rendering from lighting calculation. N objects + M lights = N+M passes, not N×M. Critical for levels with dozens of dynamic light sources."}</InfoBox></Section>
           <Section title={lang==='ru'?"G-Buffer — что хранится в каждом канале":"G-Buffer — What's in Each Channel"} tag="★ hot">
               <LearnCard tabs={{
                 "Суть":"G-Buffer (Geometry Buffer) — набор render targets куда Base Pass записывает всё о поверхности: нормали, цвет, roughness, metallic. Lighting Pass потом читает эти данные и считает освещение для всего экрана за один проход.",
                 "Зачем":"Без G-Buffer каждый источник света должен знать о каждом материале — O(N×M) complexity. С G-Buffer: материалы пишут в буфер один раз, источники света читают буфер — O(N+M). Это и есть суть deferred рендеринга.",
                 "На интервью":`UE5 G-Buffer: GBufferA — World Normal (RGB) + Shading Model ID (A). GBufferB — Metallic, Specular, Roughness, Shadow flags. GBufferC — BaseColor (RGB) + IndirectIrradiance (A). Scene Depth — для реконструкции World Position: из depth + UV + InvViewProj получаем 3D позицию любого пикселя без хранения XYZ.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"G-Buffer is a set of render targets storing surface data: normals, albedo, PBR params, depth. Filled in the Base Pass. Used by Lighting Pass to calculate lighting independently for each pixel.","Why":"Without G-Buffer, each light would need to re-render all geometry (O(N×M)). With G-Buffer: render geometry once, then N lighting passes over the same pixel data (O(N+M)).","In Interview":`GBufferA: World Normal + Shading Model. GBufferB: Metallic, Specular, Roughness. GBufferC: BaseColor. SceneDepth: for world position reconstruction. Lighting Pass reads G-Buffer and processes each light as a fullscreen quad.`}}/>
+
               <GBufferViz/>
             </Section>
           <Section title={lang==='ru'?"Render Passes в UE5 — порядок и назначение":"Render Passes in UE5 — Order & Purpose"} tag="pipeline"><RenderPassesViz/></Section>
@@ -3311,10 +3901,50 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"Три главные технологии UE5. Nanite — виртуализированная геометрия (бесконечные полигоны). Lumen — полностью динамическое GI и отражения. VSM — виртуализированные тени для Nanite-объектов. Вместе они меняют пайплайн: меньше ручной работы с LOD и лайтмапами.",
                 "Зачем":"До UE5: TA тратил время на настройку LOD каждого меша, запекание лайтмап (часы на ферме), настройку shadow cascades. С Nanite+Lumen: LOD автоматический, GI динамическое, тени через VSM. TA фокусируется на материалах и оптимизации по-новому.",
                 "На интервью":`Nanite ограничения: только Opaque материалы, нет skeletal mesh, нет WPO (в UE5.0, частично в 5.1+). Lumen ограничения: нет мобильных платформ, задержка при резких изменениях освещения, ~2-4ms cost. VSM нужен потому что traditional shadow maps не работают с Nanite — слишком много треугольников для shadow render. VSM виртуализирует shadow map как страницы — рендерится только видимая часть.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"Three key UE5 technologies. Nanite — virtualized geometry (effectively infinite polygons). Lumen — fully dynamic GI and reflections. VSM — virtualized shadows for Nanite objects. Together they change the pipeline: less manual LOD and lightmap work.","Why":"Nanite removes manual LOD for static meshes. Lumen removes lightmap baking. VSM provides high-quality shadows compatible with Nanite. The result: more time on content, less on technical optimization.","In Interview":`Nanite: only Opaque, no WPO (UE5.0), no skeletal. Lumen: no mobile, ≈2-4ms cost, latency on sudden changes. VSM: requires Nanite for full efficiency, higher VRAM than CSM. All three are PC/Console features — mobile uses traditional pipeline.`}}/>
+
               <LumenNaniteVSM/>
             </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"Translucency Pipeline · Sorting · Limitations":"Translucency Pipeline · Sorting · Limitations"} tag="★ theory">
+            <LearnCard tabs={{"Суть":"Translucent объекты рендерятся отдельным проходом ПОСЛЕ основного deferred pass. Причина: не пишут в depth buffer → нельзя использовать G-Buffer и deferred lighting. Сортировка back-to-front (Painter's Algorithm) по центру объекта.","На интервью":`Проблемы: 1) Сортировка только по центру объекта — длинные объекты пересекающиеся = артефакты. 2) Нет G-Buffer = forward shading = каждый свет пересчитывается. 3) Самозатенение translucency сложно. 4) Nanite не работает. 5) TAA ghosting без motion vectors. В UE5: Separate Translucency (отдельный буфер, composited после blur/DOF). Translucent Sort Order = ручная настройка приоритета. Translucency Lighting Mode: Volumetric NonDirectional/Directional/Surface перDir.`,"Зачем":"Translucent = дорого. Каждый translucent объект = forward shading с каждым light source. Множество слоёв = overdraw. Понимание почему = правильный выбор Masked vs Translucent."}}
+            tabsEn={{"Core Idea":"Translucent objects rendered in separate pass AFTER main deferred pass. Reason: don't write to depth buffer → can't use G-Buffer and deferred lighting. Sorted back-to-front (Painter's Algorithm) by object center.","In Interview":`Problems: 1) Sort by object center only — long intersecting objects = artifacts. 2) No G-Buffer = forward shading = every light recalculated. 3) Translucency self-shadowing is complex. 4) Nanite doesn't work. 5) TAA ghosting without motion vectors. UE5: Separate Translucency (separate buffer, composited after blur/DOF). Translucent Sort Order = manual priority. Translucency Lighting Mode: Volumetric NonDirectional/Directional/Surface.`,"Why":"Translucent = expensive. Each translucent object = forward shading with every light source. Many layers = overdraw. Understanding why = correct choice of Masked vs Translucent."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Decals · DBuffer · Scene Capture":"Decals · DBuffer · Scene Capture"} tag="techniques">
+            <LearnCard tabs={{"Суть":"Decal = проекция материала на геометрию. DBuffer Decal пишет в G-Buffer (работает с deferred, влияет на lighting). Scene Color Composite = накладывается поверх как sprite. Scene Capture = рендер в Render Target с отдельной камеры.","На интервью":`DBuffer Decal: Domain = Deferred Decal, Blend Mode = DBuffer Translucent. Пишет BaseColor/Normal/Roughness в G-Buffer → участвует в deferred lighting. Лучший выбор для: крови, грязи, следов. Scene Color Composite: рендерится поверх G-Buffer, не влияет на lighting. Для: UI в мире, неоновые вывески. Scene Capture: SceneCapture2D → Render Target. Дорого: полный рендер сцены! Используй VisibleActors list для ограничения. Scene Capture Cube для reflections (замена Reflection Capture Actor).`,"Зачем":"DBuffer decals = стандарт для наклеек с правильным освещением. Scene Capture = основа для minimap, security camera, portal rendering, split-screen."}}
+            tabsEn={{"Core Idea":"Decal = material projection onto geometry. DBuffer Decal writes to G-Buffer (works with deferred, affects lighting). Scene Color Composite = overlays like sprite. Scene Capture = render to Render Target from separate camera.","In Interview":`DBuffer Decal: Domain = Deferred Decal, Blend Mode = DBuffer Translucent. Writes BaseColor/Normal/Roughness to G-Buffer → participates in deferred lighting. Best for: blood, dirt, footprints. Scene Color Composite: renders over G-Buffer, no lighting influence. For: world UI, neon signs. Scene Capture: SceneCapture2D → Render Target. Expensive: full scene render! Use VisibleActors list to limit scope. Scene Capture Cube for reflections (replacement for Reflection Capture Actor).`,"Why":"DBuffer decals = standard for stickers with correct lighting. Scene Capture = foundation for minimap, security camera, portal rendering, split-screen."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"SSR · Reflections · Virtual Textures":"SSR · Reflections · Virtual Textures"} tag="advanced">
+            <LearnCard tabs={{"Суть":"SSR (Screen Space Reflections) = отражения на основе уже отрендеренного кадра. Raymarching в screen space от точки поверхности по вектору reflect(). Ограничение: видит только то что на экране. Runtime Virtual Textures (RVT) = огромные виртуальные текстуры потоково загружаемые.","На интервью":`SSR: читает SceneColor + SceneDepth, raymarches по screen space. Быстро, но: нет отражений за краем экрана, нет отражений на прозрачном, артефакты на краях. Reflection Capture: статическая запечённая cubemap, дешёво. Lumen reflections: динамические, программная трассировка лучей. RVT: идеально для terrain texturing (огромные ландшафты). Запись: Actor пишет в RVT (дорого). Чтение: материал читает как texture sample. Используется для: terrain layers, blending, road marks.`,"Зачем":"SSR = дешёвый способ добавить reflections на плоских поверхностях (вода, пол). RVT = единственный способ сделать детализированный terrain без тайлинга без огромного потребления памяти."}}
+            tabsEn={{"Core Idea":"SSR (Screen Space Reflections) = reflections based on already rendered frame. Raymarching in screen space from surface point along reflect() vector. Limitation: only sees what's on screen. Runtime Virtual Textures (RVT) = huge virtual textures loaded in streaming.","In Interview":`SSR: reads SceneColor + SceneDepth, raymarch screen space. Fast but: no reflections beyond screen edge, no reflections on transparent surfaces, edge artifacts. Reflection Capture: static baked cubemap, cheap. Lumen reflections: dynamic, software ray tracing. RVT: ideal for terrain texturing (huge landscapes). Writing: Actor writes to RVT (expensive). Reading: material reads as texture sample. Used for: terrain layers, blending, road marks.`,"Why":"SSR = cheap way to add reflections on flat surfaces (water, floor). RVT = only way to do detailed terrain without tiling without huge memory consumption."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"TAA · TSR · Motion Vectors — временное сглаживание":"TAA · TSR · Motion Vectors — Temporal Anti-Aliasing"} tag="★ theory">
+            <LearnCard tabs={{"Суть":"TAA (Temporal Anti-Aliasing) = смешение текущего кадра с предыдущими через репроекцию. Требует motion vectors — смещение каждого пикселя между кадрами. TSR (Temporal Super Resolution) = UE5-native апскейлер, работает как TAA + upscale. Ghosting = артефакт при отсутствии правильных motion vectors.","На интервью":`Motion Vectors: каждый объект рендерит своё движение в Velocity буфер. Static objects = камера motion. Dynamic objects = объект + камера. Без motion vectors: TAA ghosting (размытый след за объектом). Particle systems без motion vectors = артефакты. TSR vs DLSS/FSR: TSR = встроен в UE5, не требует нейросеть. r.TSR.History.ScreenPercentage контролирует качество. Anti-Ghosting: меньше = меньше ghosting, больше shimmer. Screen Percentage = внутреннее разрешение для TSR апскейла (50%=четверть пикселей → апскейл до 100%). Проблемы WPO с TAA: WPO не генерирует motion vectors автоматически в UE5.0 → TAA ghosting.`,"Аналогия":"TAA как фотограф с длинной выдержкой: накапливает несколько кадров для меньшего шума. Motion vectors говорят 'этот пиксель был тут на прошлом кадре' → правильное смешение без ghosting."}}
+            tabsEn={{"Core Idea":"TAA (Temporal Anti-Aliasing) = blend current frame with previous via reprojection. Requires motion vectors — per-pixel displacement between frames. TSR (Temporal Super Resolution) = UE5-native upscaler, works like TAA + upscale. Ghosting = artifact when correct motion vectors are missing.","In Interview":`Motion Vectors: each object renders its movement into Velocity buffer. Static objects = camera motion. Dynamic objects = object + camera motion. Without motion vectors: TAA ghosting (blurry trail behind object). Particle systems without motion vectors = artifacts. TSR vs DLSS/FSR: TSR = built into UE5, no neural network required. r.TSR.History.ScreenPercentage controls quality. Anti-Ghosting: lower = less ghosting, more shimmer. Screen Percentage = internal resolution for TSR upscale (50% = quarter pixels → upscale to 100%). WPO problem with TAA: WPO doesn't generate motion vectors automatically in UE5.0 → TAA ghosting.`,"Analogy":"TAA like long-exposure photography: accumulates several frames for less noise. Motion vectors say 'this pixel was HERE last frame' → correct blending without ghosting."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Реконструкция World Position из Depth":"World Position Reconstruction from Depth"} tag="theory">
+            <LearnCard tabs={{"Суть":"Scene Depth = расстояние от камеры до поверхности. Из depth + UV + InvViewProjection Matrix можно восстановить точный World Position без G-Buffer позиции. Это основа для: screen-space fog, proximity effects, custom depth-based PP.","На интервью":`Алгоритм: 1) SceneTexture:SceneDepth → получить Z. 2) UV → NDC: NDC.xy = UV*2-1 (Y инвертировать). 3) Clip Space: float4(NDC.xy, depth, 1.0). 4) World = mul(InvViewProjectionMatrix, ClipPos). 5) World /= World.w. В UE5 Material Graph: ReconstructWorldPosition нод делает это автоматически. Применения: height-based fog (WorldPos.z > threshold = fade), screen-space proximity (WorldPos - ActorPos = distance), procedural world-space tiling без UV.`,"Зачем":"G-Buffer не хранит World Position явно (экономит память). Depth = компактный способ хранить всю пространственную информацию. ReconstructWorldPosition в UE5 = одна нода, но понимать алгоритм важно для custom post-process шейдеров и compute shaders."}}
+            tabsEn={{"Core Idea":"Scene Depth = distance from camera to surface. From depth + UV + InvViewProjection Matrix you can reconstruct exact World Position without a G-Buffer position channel. Foundation for: screen-space fog, proximity effects, custom depth-based PP.","In Interview":`Algorithm: 1) SceneTexture:SceneDepth → get Z. 2) UV → NDC: NDC.xy = UV*2-1 (invert Y). 3) Clip Space: float4(NDC.xy, depth, 1.0). 4) World = mul(InvViewProjectionMatrix, ClipPos). 5) World /= World.w. In UE5 Material Graph: ReconstructWorldPosition node does this automatically. Uses: height-based fog (WorldPos.z > threshold = fade), screen-space proximity (WorldPos - ActorPos = distance), procedural world-space tiling without UV.`,"Why":"G-Buffer doesn't store World Position explicitly (saves memory). Depth = compact way to store all spatial information. ReconstructWorldPosition in UE5 = one node, but understanding the algorithm is important for custom post-process shaders and compute shaders."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Lumen — практические настройки":"Lumen — Practical Settings"} tag="ue5-practical">
+            <LearnCard tabs={{"Суть":"Lumen включён по умолчанию в UE5. Основные рычаги: качество (Lumen Scene Detail, Ray Count), performance (Software vs Hardware Ray Tracing), дистанция (Lumen Scene View Distance). Большинство проблем решается правильной настройкой PostProcessVolume.","На интервью":`Ключевые CVars: r.Lumen.Reflections.Allow 1/0, r.Lumen.DiffuseIndirect.Allow 1/0. PostProcessVolume: Lumen Global Illumination Intensity (0=off), Lumen Reflections Intensity. Quality: Lumen Scene Detail (больше = больше объектов трекает, дороже). Final Gather Quality (дороже = меньше шума). Hardware Ray Tracing: лучше качество, требует DX12 + RT capable GPU. Software Ray Tracing: работает везде, дешевле, менее точно. Проблемы: светлые пятна = увеличить Max Ray Bounces. Шум = увеличить Final Gather Quality. Medial = увеличить Lumen Scene View Distance.`,"Зачем":"Lumen 'из коробки' не всегда оптимален. Неправильные настройки = 4ms дополнительного overhead или видимый шум. Понимание параметров = правильный трейдоф между качеством и производительностью для конкретного проекта."}}
+            tabsEn={{"Core Idea":"Lumen is enabled by default in UE5. Main levers: quality (Lumen Scene Detail, Ray Count), performance (Software vs Hardware Ray Tracing), distance (Lumen Scene View Distance). Most problems solved by correct PostProcessVolume settings.","In Interview":`Key CVars: r.Lumen.Reflections.Allow 1/0, r.Lumen.DiffuseIndirect.Allow 1/0. PostProcessVolume: Lumen Global Illumination Intensity (0=off), Lumen Reflections Intensity. Quality: Lumen Scene Detail (higher = more objects tracked, more expensive). Final Gather Quality (higher = less noise, more expensive). Hardware Ray Tracing: better quality, requires DX12 + RT capable GPU. Software Ray Tracing: works everywhere, cheaper, less accurate. Issues: bright patches = increase Max Ray Bounces. Noise = increase Final Gather Quality. Leaking = increase Lumen Scene View Distance.`,"Why":"Lumen out-of-the-box isn't always optimal. Wrong settings = 4ms additional overhead or visible noise. Understanding parameters = correct quality vs performance tradeoff for specific project."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"World Partition · HLOD · Level Streaming":"World Partition · HLOD · Level Streaming"} tag="advanced">
+            <LearnCard tabs={{"Суть":"World Partition = UE5 система автоматического стриминга мира. Мир делится на ячейки (cells), загружаются только видимые. HLOD (Hierarchical LOD) = автоматически генерирует merged mesh для дальних зон. Level Streaming = старый API для streaming подуровней.","На интервью":`World Partition: включается в World Settings. Grid размер = размер streaming ячейки. Runtime Grid = какие акторы стримятся. Data Layers = группировка акторов (day/night, story). HLOD: Static Mesh HLOD = мерджит геометрию + материалы. Instanced HLOD = инстанцирует похожие меши. Simplygon/Auto = авто упрощение. Level Streaming vs World Partition: Streaming = ручное управление подуровнями. WP = автоматическое по proximity. One File Per Actor (OFPA) = каждый актор = отдельный файл для merge conflicts. Правило: < 2km карта = обычный уровень. > 2km = World Partition.`,"Зачем":"Open world без World Partition = всё в памяти одновременно = невозможно. HLOD = дальние зоны = один draw call вместо тысяч. Data Layers = управление видимостью без перезагрузки уровня."}}
+            tabsEn={{"Core Idea":"World Partition = UE5 system for automatic world streaming. World divided into cells, only visible cells loaded. HLOD (Hierarchical LOD) = auto-generates merged mesh for distant zones. Level Streaming = old API for streaming sub-levels.","In Interview":`World Partition: enabled in World Settings. Grid size = streaming cell size. Runtime Grid = which actors stream. Data Layers = actor grouping (day/night, story). HLOD: Static Mesh HLOD = merges geometry + materials. Instanced HLOD = instances similar meshes. Simplygon/Auto = auto simplification. Level Streaming vs World Partition: Streaming = manual sub-level management. WP = automatic by proximity. One File Per Actor (OFPA) = each actor = separate file for merge conflicts. Rule: < 2km map = regular level. > 2km = World Partition.`,"Why":"Open world without World Partition = everything in memory simultaneously = impossible. HLOD = distant zones = one draw call instead of thousands. Data Layers = visibility management without level reload."}}/>
+          </Section>
+
+    </>)}
 
         {active==="optimization"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.yellow,letterSpacing:3,marginBottom:4}}>{T[lang].mods.optimization}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.optimization}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.optimization}</p></div>
@@ -3323,7 +3953,9 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"Профайлинг — это поиск узкого места. Нельзя оптимизировать вслепую. Правило: сначала измерь, потом оптимизируй. stat GPU показывает время каждого render pass в миллисекундах — сразу видно что тормозит.",
                 "Зачем":"60 FPS = 16.6ms на кадр. 30 FPS = 33ms. Если Shadow Depth Pass занимает 8ms — это половина бюджета. RenderDoc позволяет зайти внутрь любого draw call и увидеть какой шейдер работал, какие текстуры были bound, сколько пикселей обработано.",
                 "На интервью":`Workflow: stat Unit → понять CPU-bound или GPU-bound. Если GPU-bound → stat GPU → найти дорогой pass. profilegpu → детальное дерево passes одного кадра. RenderDoc → зайти внутрь конкретного draw call. Unreal Insights → для CPU-bound: видно какой Blueprint/код тормозит по функциям с точным временем.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"Profiling = finding the bottleneck. You can't optimize without measuring first. Workflow: stat Unit → identify CPU/GPU-bound → use matching tool (Unreal Insights for CPU, RenderDoc for GPU) → fix the bottleneck.","Why":"Optimizing the wrong thing wastes time. If GPU-bound, optimizing Blueprint logic won't help. Always profile first, then fix the actual bottleneck.","In Interview":`First command: stat Unit — shows GPU/CPU/Frame/Game time. GPU-bound test: r.ScreenPercentage 50 — if FPS jumps, GPU-bound. profilegpu — one detailed frame with pass tree. Unreal Insights — full CPU thread timeline. RenderDoc — GPU pass analysis and shader debugging.`}}/>
+
               <ProfilingTools/>
             </Section>
           <Section title={lang==='ru'?"LOD System — Screen Size thresholds":"LOD System — Screen Size Thresholds"} tag="lod">
@@ -3331,7 +3963,8 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"LOD (Level of Detail) — система автоматической замены высокополигональной модели на упрощённую при удалении от камеры. Ключевой параметр — Screen Size: какую долю экрана занимает объект (0.0 до 1.0).",
                 "Зачем":"Камень вдали занимает 5×5 пикселей. Рендерить его с 50k полигонами бессмысленно — результат неотличим от 100 полигонов. LOD экономит vertex processing (VS runs) и пропускную способность памяти. HISM управляет LOD для тысяч инстансов автоматически.",
                 "На интервью":`Screen Size в UE5 — не пиксели, а доля экрана от 0 до 1. LOD0 обычно 1.0→0.3, LOD1: 0.3→0.1, LOD2: 0.1→0.01, Culled: <0.01. Nanite заменяет ручной LOD для static meshes — автоматически выбирает нужную детализацию на GPU. Для skeletal meshes и dynamic objects LOD по-прежнему нужен вручную.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"LOD = automatic mesh swap by screen coverage. LOD0 full quality, LOD1-3 simplified. Engine picks LOD by screen size %. Reduces GPU vertex load for distant objects.","Why":"100K triangles for a 5-pixel object is wasteful. LOD3 (10% polygons) far away — huge savings, no visible loss.","In Interview":"Setup in Static Mesh Editor: LOD Count + Screen Size per LOD. LOD0=1.0 (full screen). LOD1=0.3. LOD2=0.1. Nanite replaces manual LOD for Opaque static meshes."}}/>
               <LODViz/>
             </Section>
           <Section title="Instancing — ISM vs HISM vs Nanite" tag="instancing"><InstancingViz/></Section>
@@ -3340,23 +3973,813 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"Текстуры — самый большой потребитель VRAM. 4K текстура без компрессии = 64 MB. С BC7 компрессией = 8 MB. Texture streaming загружает только нужные mip-уровни — объекты вдали используют mip4 (маленький), близкие — mip0 (полный размер).",
                 "Зачем":"GPU читает текстуры через texture cache. Если текстура не помещается в кэш — cache miss, GPU ждёт данных из VRAM (сотни циклов задержки). Mip maps снижают вероятность cache miss для далёких объектов. BC5 для normal maps вместо BC3 — хранит только RG, экономит 50% при том же качестве.",
                 "На интервью":`Форматы: BC1 (DXT1) — RGB без альфы, 4 bpp. BC3 (DXT5) — RGBA, 8 bpp. BC5 — только RG, идеален для normal maps (Z восстанавливается в шейдере: z=sqrt(1-x²-y²)). BC7 — высококачественный RGBA. ASTC — мобильные. Texture streaming pool: r.Streaming.PoolSize. Overflow в логах — критичный сигнал, текстуры начнут загружаться в низком разрешении.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"Textures are the largest VRAM consumer. A 4K RGBA8 uncompressed = 64MB. With BC1 compression = 8MB. BC5 for normals. Mip maps: pre-generated LODs for textures. Streaming: loads only necessary mip levels.","Why":"VRAM overflow = texture streaming from RAM → massive performance drop. Texture budget management prevents this. Compressed formats (BC1-BC7) reduce VRAM 4-8x with minimal visual quality loss.","In Interview":`Formats: BC1 (DXT1) — no alpha, 4bpp. BC3 (DXT5) — with alpha, 8bpp. BC5 — normal maps (RG only). BC7 — high quality. Streaming pool: r.Streaming.PoolSize. Over-budget: stat TextureGroup shows usage per group.`}}/>
+
               <TextureOptimization/>
             </Section>
           <Section title={lang==='ru'?"Overdraw — fillrate bottleneck":"Overdraw — Fillrate Bottleneck"} tag="overdraw"><OverdrawSection/></Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"Hard References · Reference Viewer · Size Map":"Hard References · Reference Viewer · Size Map"} tag="★ memory">
+            <LearnCard tabs={{"Суть":"Hard reference = UPROPERTY на ассет: при загрузке объекта все hard refs грузятся вместе. Это скрытая причина медленной загрузки. Soft reference = строка пути (TSoftObjectPtr), грузится только явно. Reference Viewer = граф зависимостей ассета.","На интервью":`Reference Viewer: ПКМ на ассете → Reference Viewer. Ищи цепочки: GameMode → Character BP → 50 текстур = грузятся при старте. Size Map: ПКМ на папке → Size Map. memreport: консоль memreport -full → файл Saved/Profiling. Soft ref в C++: TSoftObjectPtr<UTexture2D>. Async load: UAssetManager::GetStreamableManager().RequestAsyncLoad(). Audit references перед packaging — обязательно.`,"Аналогия":"Hard reference — ты держишь друга за руку. Куда бы ты ни пошёл, он идёт с тобой (грузится). Soft reference — у тебя есть номер телефона друга. Ты позвонишь ему только когда нужно (async load)."}}
+            tabsEn={{"Core Idea":"Hard reference = UPROPERTY on asset: loading object loads all hard refs together. Hidden cause of slow loading. Soft reference = path string (TSoftObjectPtr), loads only on explicit call. Reference Viewer = asset dependency graph.","In Interview":`Reference Viewer: RMB on asset → Reference Viewer. Look for chains: GameMode → Character BP → 50 textures = loads at startup. Size Map: RMB on folder → Size Map. memreport: console memreport -full → file Saved/Profiling. Soft ref C++: TSoftObjectPtr<UTexture2D>. Async load: UAssetManager::GetStreamableManager().RequestAsyncLoad(). Audit references before packaging — mandatory.`,"Analogy":"Hard reference = holding your friend's hand. Wherever you go, they go too (gets loaded). Soft reference = having your friend's phone number. You call only when needed (async load)."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"PSO Hitches · GC Hitches · Blueprint Tick":"PSO Hitches · GC Hitches · Blueprint Tick"} tag="hitches">
+            <LearnCard tabs={{"Суть":"PSO (Pipeline State Object) = скомпилированный GPU state. При первой встрече = hitch. GC (Garbage Collector) = периодический фриз. Blueprint Tick = CPU overhead каждый кадр на каждый актор. Три разных источника hitches с разными решениями.","На интервью":`PSO: r.ShaderPipelineCache.Enabled 1 — запись при первом прохождении, коммит .rec.upipelinecache. GC: gc.MaxObjectsNotConsideredByGC → ForceGC после загрузки уровня. Blueprint Tick: Tick Browser (Window → World Partition), SetActorTickEnabled(false), SetActorTickInterval(0.1). Диагностика: stat Hitches, stat game (Game Thread), Unreal Insights CPU timeline.`,"Зачем":"PSO hitch при открытии первой двери = плохой UX. GC hitch каждые 60 секунд = предсказуемый фриз во время геймплея. 1000 BP акторов с Tick = 1ms+ просто на dispatch."}}
+            tabsEn={{"Core Idea":"PSO (Pipeline State Object) = compiled GPU state. First encounter = hitch. GC (Garbage Collector) = periodic freeze. Blueprint Tick = CPU overhead every frame per actor. Three different hitch sources with different solutions.","In Interview":`PSO: r.ShaderPipelineCache.Enabled 1 — record on first playthrough, commit .rec.upipelinecache. GC: gc.MaxObjectsNotConsideredByGC → ForceGC after level load. Blueprint Tick: Tick Browser (Window → World Partition), SetActorTickEnabled(false), SetActorTickInterval(0.1). Diagnose: stat Hitches, stat game (Game Thread), Unreal Insights CPU timeline.`,"Why":"PSO hitch when opening first door = bad UX. GC hitch every 60 seconds = predictable in-gameplay freeze. 1000 BP actors with Tick = 1ms+ just for dispatch."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Пайплайн: сцена тормозит — с чего начать":"Pipeline: Scene is Slow — Where to Start"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"Шаг 1: stat Unit — CPU-bound или GPU-bound? Шаг 2: найти конкретное место. Шаг 3: исправить. Шаг 4: верифицировать. Никогда не оптимизировать вслепую.","Как работает":`ДИАГНОСТИКА:
+1. stat Unit → GPU ms vs CPU ms
+   GPU > CPU → GPU-bound → шаг 2a
+   CPU > GPU → CPU-bound → шаг 2b
+
+2a. GPU-BOUND:
+   profilegpu → найти длинный pass
+   viewmode ShaderComplexity → красные пиксели
+   viewmode QuadOverdraw → overdraw
+
+2b. CPU-BOUND:
+   stat game → GameThread ms
+   stat scenerendering → DrawCallsCount
+   Unreal Insights → CPU timeline
+
+РЕШЕНИЯ GPU:
+• Сложный материал → упростить, убрать samples
+• Много draw calls → HISM, Nanite, batching
+• Overdraw → Masked вместо Translucent
+• Много lights → сделать Static
+
+РЕШЕНИЯ CPU:
+• Blueprint Tick → делегаты, таймеры
+• Много draw calls → instancing
+• Physics → упростить collision
+
+ВЕРИФИКАЦИЯ: stat Unit до/после каждого изменения`,"На интервью":`"Сначала stat Unit. GPU-bound → profilegpu → ShaderComplexity → упрощаю дорогой материал. CPU-bound → stat game → draw calls и Blueprint tick." Показать систему, не гадать.`}}
+            tabsEn={{"Core Idea":"Step 1: stat Unit — CPU-bound or GPU-bound? Step 2: find exact hotspot. Step 3: fix. Step 4: verify. Never optimize blind — measure first.","How It Works":`DIAGNOSIS:
+1. stat Unit → GPU ms vs CPU ms
+   GPU > CPU → GPU-bound → step 2a
+   CPU > GPU → CPU-bound → step 2b
+
+2a. GPU-BOUND:
+   profilegpu → find longest pass
+   viewmode ShaderComplexity → red pixels
+   viewmode QuadOverdraw → overdraw layers
+
+2b. CPU-BOUND:
+   stat game → GameThread ms
+   stat scenerendering → DrawCallsCount
+   Unreal Insights → CPU timeline
+
+GPU SOLUTIONS:
+• Complex material → simplify, remove samples
+• Many draw calls → HISM, Nanite, batching
+• Overdraw → Masked instead of Translucent
+• Many lights → make Static
+
+CPU SOLUTIONS:
+• Blueprint Tick → delegates, timers
+• Many draw calls → instancing
+• Physics → simplify collision
+
+VERIFY: stat Unit before/after every change`,"In Interview":`"First stat Unit. GPU-bound → profilegpu → ShaderComplexity → simplify expensive material. CPU-bound → stat game → draw calls and Blueprint tick." Show system, don't guess.`}}/>
+                        <OptimizationFlowViz/>
+</Section>
+
+          <Section title={lang==='ru'?"Пайплайн: оптимизация материала/шейдера":"Pipeline: Material / Shader Optimization"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"Получаешь реквест: материал медленный. Алгоритм: измерить instruction count → найти дорогие ноды → channel packing / процедурные замены / Static Switch / Material LOD → верифицировать.","Как работает":`ШАГ 1 — ИЗМЕРИТЬ:
+Material Editor → Window → Stats
+PS Instructions: мобайл < 100, PC < 300
+Texture Samples: мобайл < 5, PC < 15
+
+ШАГ 2 — НАЙТИ ДОРОГОЕ:
+viewmode ShaderComplexity
+Window → HLSL Code → что генерируется
+
+ШАГ 3 — ТЕХНИКИ (по приоритету):
+
+A. Channel Packing:
+   4 grayscale → RGBA = 1 sample вместо 4
+   BC5 для Normal Map (RG каналы)
+
+B. Процедурные замены:
+   Tile текстура → frac(UV*N)
+   Gradient → lerp с параметром
+   Vignette → 1-length(UV-0.5)*2
+
+C. Static Switch вместо dynamic if:
+   bool параметр → Static Switch
+   = zero рантаймовый cost
+
+D. Material LOD:
+   Упрощённый материал для LOD2+
+   Quality Switch нод
+   Убрать Normal Map на дальних LOD
+
+ШАГ 4 — ВЕРИФИЦИРОВАТЬ:
+Stats до/после (инструкции, samples)
+profilegpu Base Pass до/после`,"На интервью":`"Material Stats → instruction count и texture samples. Ищу дублирующиеся samples → channel packing. Простые паттерны → процедурно. bool в if → Static Switch. LOD2+ упрощённый материал."`,
+"Аналогия":"Instruction count как счёт в ресторане. Сначала смотришь что стоит дорого, потом думаешь что можно заменить дешёвым аналогом."}}
+            tabsEn={{"Core Idea":"You get a request: material is slow. Algorithm: measure instruction count → find expensive nodes → channel packing / procedural replacements / Static Switch / Material LOD → verify.","How It Works":`STEP 1 — MEASURE:
+Material Editor → Window → Stats
+PS Instructions: mobile < 100, PC < 300
+Texture Samples: mobile < 5, PC < 15
+
+STEP 2 — FIND WHAT'S EXPENSIVE:
+viewmode ShaderComplexity
+Window → HLSL Code → what's generated
+
+STEP 3 — TECHNIQUES (by priority):
+
+A. Channel Packing:
+   4 grayscale → RGBA = 1 sample instead of 4
+   BC5 for Normal Map (RG channels)
+
+B. Procedural replacements:
+   Tile texture → frac(UV*N)
+   Gradient → lerp with parameter
+   Vignette → 1-length(UV-0.5)*2
+
+C. Static Switch instead of dynamic if:
+   bool parameter → Static Switch
+   = zero runtime cost
+
+D. Material LOD:
+   Simplified material for LOD2+
+   Quality Switch node
+   Remove Normal Map on distant LODs
+
+STEP 4 — VERIFY:
+Stats before/after (instructions, samples)
+profilegpu Base Pass before/after`,"In Interview":`"Material Stats → instruction count and texture samples. Look for duplicate samples → channel packing. Simple patterns → procedural. bool in if → Static Switch. LOD2+ simplified material."`,
+"Analogy":"Instruction count like a restaurant bill. First look at what's expensive, then find a cheaper alternative."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Пайплайн: оптимизация UI":"Pipeline: UI Performance Optimization"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"UI лагает. Алгоритм: stat SlateUI → Widget Reflector → найти дорогой виджет → пять типичных причин → применить решение → верифицировать.","Как работает":`ШАГ 1 — ИЗМЕРИТЬ:
+stat SlateUI → SlatePrepass + SlatePaint
+Проблема: > 2ms мобайл, > 5ms PC
+
+ШАГ 2 — НАЙТИ ВИНОВНИКА:
+Window → Widget Reflector → Pick Hit-Testable
+Кликнуть → класс и время
+stat SlateVerbose → breakdown по классам
+
+ШАГ 3 — 5 ТИПИЧНЫХ ПРОБЛЕМ:
+
+1. TICK в каждом виджете:
+   → Делегаты (OnHealthChanged.AddDynamic)
+   → SetTimer для периодических updates
+
+2. ScrollBox с большим списком:
+   → UListView + IUserObjectListEntry
+   → ~20 виджетов вместо 1000
+
+3. Избыточная инвалидация:
+   → Invalidation Box вокруг статичного дерева
+   → SetText только при реальном изменении
+
+4. Дорогой шейдер на большом виджете:
+   → Retainer Box + RenderOnPhase(3)
+   → Упростить материал
+
+5. Много draw calls:
+   → Единый материал с параметрами
+   → Texture atlas для иконок
+   → Native Image (без материала)
+
+ШАГ 4 — ВЕРИФИЦИРОВАТЬ:
+stat SlateUI до/после каждого изменения`,"На интервью":`"stat SlateUI → Widget Reflector → нашёл дорогой виджет. Типично: убираю Tick → делегаты, ScrollBox → ListView, статичное дерево → Invalidation Box, дорогой шейдер → Retainer Box."`,
+"Зачем":"UI может незаметно съедать 5-10ms каждый кадр. На мобайл бюджет всего 16ms — 10ms на UI = катастрофа."}}
+            tabsEn={{"Core Idea":"UI is lagging. Algorithm: stat SlateUI → Widget Reflector → find expensive widget → five typical causes → apply solution → verify.","How It Works":`STEP 1 — MEASURE:
+stat SlateUI → SlatePrepass + SlatePaint
+Problem: > 2ms mobile, > 5ms PC
+
+STEP 2 — FIND THE CULPRIT:
+Window → Widget Reflector → Pick Hit-Testable
+Click → class and time
+stat SlateVerbose → breakdown by class
+
+STEP 3 — 5 TYPICAL PROBLEMS:
+
+1. TICK in every widget:
+   → Delegates (OnHealthChanged.AddDynamic)
+   → SetTimer for periodic updates
+
+2. ScrollBox with large list:
+   → UListView + IUserObjectListEntry
+   → ~20 widgets instead of 1000
+
+3. Excessive invalidation:
+   → Invalidation Box around static tree
+   → SetText only on actual change
+
+4. Expensive shader on large widget:
+   → Retainer Box + RenderOnPhase(3)
+   → Simplify material
+
+5. Many draw calls:
+   → Single material with parameters
+   → Texture atlas for icons
+   → Native Image (no material)
+
+STEP 4 — VERIFY:
+stat SlateUI before/after every change`,"In Interview":`"stat SlateUI → Widget Reflector → found expensive widget. Typically: remove Tick → delegates, ScrollBox → ListView, static tree → Invalidation Box, expensive shader → Retainer Box."`,
+"Why":"UI can quietly consume 5-10ms per frame. Mobile budget is only 16ms — 10ms for UI = disaster."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Пайплайн: оптимизация памяти/VRAM":"Pipeline: Memory / VRAM Optimization"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"Игра крашится от памяти или streaming pool переполнен. Алгоритм: memreport → Size Map → Reference Viewer → найти тяжёлые ассеты и неправильные hard refs → исправить.","Как работает":`ШАГ 1 — ИЗМЕРИТЬ:
+Консоль: memreport -full
+Файл: Saved/Profiling/MemReports/
+stat TextureGroup → streaming pool usage
+stat Memory → общая картина
+
+ШАГ 2 — НАЙТИ ТЯЖЁЛЫЕ:
+Content Browser → ПКМ на папке → Size Map
+Сортировать по размеру → найти > 50MB
+
+ШАГ 3 — НАЙТИ НЕПРАВИЛЬНЫЕ REFS:
+ПКМ на ассете → Reference Viewer
+Цепочка GameMode → Character BP → 50 текстур
+= все грузятся при старте игры
+
+ШАГ 4 — ТИПИЧНЫЕ ИСПРАВЛЕНИЯ:
+
+A. Текстуры слишком большие:
+   4K на мелком пропе? → снизить MaxSize
+   LODBias +1 = вдвое меньше памяти
+
+B. Нет компрессии:
+   BC1/BC3/BC5/BC7 для всех текстур
+   Mip Maps = Enable (без mip = всегда полный размер)
+
+C. Hard refs → Soft refs:
+   UPROPERTY UTexture2D* → TSoftObjectPtr
+   Async load через UAssetManager
+
+ШАГ 5 — ВЕРИФИЦИРОВАТЬ:
+memreport до/после
+stat TextureGroup: streaming pool`,"На интервью":`"memreport → Size Map для тяжёлых ассетов → Reference Viewer для неожиданно загруженных. Исправляю: компрессия, LODBias, hard refs → soft refs."`,
+"Аналогия":"Reference Viewer как детектив: следуешь по цепочке улик от GameMode до текстуры, которую никто не ожидал там найти."}}
+            tabsEn={{"Core Idea":"Game crashes from memory or streaming pool overflow. Algorithm: memreport → Size Map → Reference Viewer → find heavy assets and wrong hard refs → fix.","How It Works":`STEP 1 — MEASURE:
+Console: memreport -full
+File: Saved/Profiling/MemReports/
+stat TextureGroup → streaming pool usage
+stat Memory → overall picture
+
+STEP 2 — FIND HEAVY ASSETS:
+Content Browser → RMB on folder → Size Map
+Sort by size → find > 50MB
+
+STEP 3 — FIND WRONG REFS:
+RMB on asset → Reference Viewer
+Chain GameMode → Character BP → 50 textures
+= all load at game startup
+
+STEP 4 — TYPICAL FIXES:
+
+A. Textures too large:
+   4K on small prop? → reduce MaxSize
+   LODBias +1 = half memory usage
+
+B. No compression:
+   BC1/BC3/BC5/BC7 for all textures
+   Mip Maps = Enable (no mip = always full size)
+
+C. Hard refs → Soft refs:
+   UPROPERTY UTexture2D* → TSoftObjectPtr
+   Async load via UAssetManager
+
+STEP 5 — VERIFY:
+memreport before/after
+stat TextureGroup: streaming pool`,"In Interview":`"memreport → Size Map for heavy assets → Reference Viewer for unexpectedly loaded. Fix: compression, LODBias, hard refs → soft refs."`,
+"Analogy":"Reference Viewer is like a detective: follow the chain of clues from GameMode to a texture nobody expected to find there."}}/>
+                        <VRAMBudgetViz/>
+</Section>
+
+          <Section title={lang==='ru'?"Пайплайн: реквест от команды — правильный процесс":"Pipeline: Art Team Request — Correct Process"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"Художник приходит: 'сделай X'. Правильный процесс: понять требования → оценить → прототип → проверить performance до арт-полиша → задокументировать ограничения. Неделя работы выброшена из-за 'слишком тяжело для мобайл' — классическая ошибка.","Как работает":`ШАГ 1 — ВОПРОСЫ ДО КОДА:
+• Платформа? (PC / Console / Mobile)
+• Сколько одновременно на экране?
+• Есть reference? (концепт, видео)
+• Есть бюджет? (ms, draw calls, memory)
+• Дедлайн?
+
+ШАГ 2 — ТА-СПЕЦИФИЧНЫЕ ВОПРОСЫ:
+
+Материал:
+• Static Mesh или Skeletal?
+• LOD нужны? Nanite?
+• Будет анимация (WPO)?
+
+VFX:
+• Интерактивный (реагирует на gameplay)?
+• Mobile = CPU emitter
+• Сколько одновременно?
+
+Инструмент:
+• Кто использует? (TA / художник / дизайнер)
+• Batch operation нужна?
+• Blueprint/Python или C++?
+
+ШАГ 3 — PROTOTYPE CHEAP FIRST:
+Blueprint, не C++
+Простой материал → добавлять сложность
+Niagara template → модифицировать
+
+ШАГ 4 — PERFORMANCE CHECK ДО ПОЛИША:
+stat Unit с прототипом в реальных условиях
+Реальные условия = вся сцена, не изолированно
+Дорого → оптимизировать СЕЙЧАС, до art polish
+
+ШАГ 5 — ДОКУМЕНТАЦИЯ:
+Что делают параметры
+Что НЕ делать (ограничения)
+LOD настройки, platform notes`,"На интервью":`"Сначала спрошу о платформе, количестве экземпляров и бюджете. Прототип в простом виде. Проверю performance до арт-полиша. Задокументирую ограничения чтобы художник не сломал его позже."`,
+"Аналогия":"Строитель не льёт фундамент без чертежей. TA не пишет шейдер без понимания платформы и бюджета."}}
+            tabsEn={{"Core Idea":"Artist comes to you: 'make X'. Correct process: understand requirements → evaluate → prototype → check performance BEFORE art polish → document limitations. A week of work thrown away because 'too heavy for mobile' — classic mistake.","How It Works":`STEP 1 — QUESTIONS BEFORE CODE:
+• Platform? (PC / Console / Mobile)
+• How many simultaneously on screen?
+• Reference? (concept, video)
+• Budget? (ms, draw calls, memory)
+• Deadline?
+
+STEP 2 — TA-SPECIFIC QUESTIONS:
+
+Material:
+• Static Mesh or Skeletal?
+• LODs needed? Nanite?
+• Will there be animation (WPO)?
+
+VFX:
+• Interactive (reacts to gameplay)?
+• Mobile = CPU emitter
+• How many simultaneously?
+
+Tool:
+• Who uses it? (TA / artist / designer)
+• Batch operation needed?
+• Blueprint/Python or C++?
+
+STEP 3 — PROTOTYPE CHEAP FIRST:
+Blueprint, not C++
+Simple material → add complexity
+Niagara template → modify
+
+STEP 4 — PERFORMANCE CHECK BEFORE POLISH:
+stat Unit with prototype in real conditions
+Real conditions = full scene, not isolated
+Expensive → optimize NOW, before art polish
+
+STEP 5 — DOCUMENTATION:
+What parameters do
+What NOT to do (limitations)
+LOD settings, platform notes`,"In Interview":`"First ask about platform, instance count and budget. Prototype in simple form. Check performance before art polish. Document limitations so artist doesn't break it later."`,
+"Analogy":"Builder doesn't pour foundation without blueprints. TA doesn't write shader without understanding platform and budget."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Skeletal Mesh Cost · Collision · Cook Size":"Skeletal Mesh Cost · Collision · Cook Size"} tag="niche">
+            <LearnCard tabs={{"Суть":"Skeletal Mesh CPU cost: skinning (bone matrices), animation evaluation, LOD streaming. Collision cost: complex collision = per-triangle (очень дорого), simple = convex hulls (дёшево). Cook size: финальный размер пакета влияет на download time и storage.","На интервью":`Skeletal Mesh: skinning на GPU (UE5 default) vs CPU. Bone count влияет на skinning cost. LOD с упрощённым скелетом: LOD1+ убирать twist/corrective кости. Merge Sections per LOD = меньше draw calls. Collision: никогда Complex Collision для gameplay (Use Complex As Simple = медленно). Convex Decomposition для сложных форм. Simple shapes (Box/Sphere/Capsule) где возможно. Cook Size: Audit Asset Size через командлет. Неиспользованные ассеты: Reference Viewer → Unreferenced. Texture размер: 4K где не нужно. Дублирование ассетов. r.streaming.poolsize влияет на VRAM не cook size.`,"Зачем":"Skeletal mesh с 200 костями на мобайл = большой CPU overhead. Collision complex = CPU physics стоимость в 10-100 раз выше. Cook size = время загрузки и стоимость хранения/bandwidth."}}
+            tabsEn={{"Core Idea":"Skeletal Mesh CPU cost: skinning (bone matrices), animation evaluation, LOD streaming. Collision cost: complex collision = per-triangle (very expensive), simple = convex hulls (cheap). Cook size: final package size affects download time and storage.","In Interview":`Skeletal Mesh: skinning on GPU (UE5 default) vs CPU. Bone count affects skinning cost. LOD with simplified skeleton: LOD1+ remove twist/corrective bones. Merge Sections per LOD = fewer draw calls. Collision: never Complex Collision for gameplay (Use Complex As Simple = slow). Convex Decomposition for complex shapes. Simple shapes (Box/Sphere/Capsule) where possible. Cook Size: Audit Asset Size via commandlet. Unused assets: Reference Viewer → Unreferenced. Texture size: 4K where unnecessary. Duplicate assets.`,"Why":"Skeletal mesh with 200 bones on mobile = large CPU overhead. Complex collision = CPU physics cost 10-100x higher. Cook size = loading time and storage/bandwidth cost."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"⚠ Типичные ошибки при оптимизации":"⚠ Common Optimization Mistakes"} tag="★ mistakes">
+            <LearnCard tabs={{"Суть":"Оптимизировать не то — хуже чем не оптимизировать вообще: тратишь время, ничего не меняется, теряешь доверие команды. Четыре паттерна неправильной оптимизации.","Ошибки":`ОШИБКА 1: "У нас GPU-bound" без stat Unit
+❌ Делаешь: "Надо снизить polycount — у нас медленно рендерится"
+💥 На самом деле: bottleneck в Blueprint Tick на CPU, GPU простаивает
+✅ Вместо: stat Unit → сначала доказать что GPU-bound, потом действовать
+
+ОШИБКА 2: Уменьшил текстуры, а bottleneck — draw calls
+❌ Делаешь: полдня сжимаешь текстуры 4K→2K
+💥 Получаешь: VRAM лучше, FPS +0%
+💡 Потому что: stat scenerendering показывал 15000 draw calls
+✅ Вместо: сначала profilegpu/stat scenerendering, потом решение
+
+ОШИБКА 3: Включил Nanite, но проблема была в материале
+❌ Делаешь: включаешь Nanite на все меши для "оптимизации"
+💥 Получаешь: Translucent меши перестают работать, WPO ломается, FPS не меняется
+💡 Потому что: bottleneck был в Translucency pass, Nanite там не помогает
+✅ Вместо: сначала понять что дорого (profilegpu), потом применять решение
+
+ОШИБКА 4: Оптимизировал polycount, а проблема — pixel shader
+❌ Делаешь: LOD bias уменьшаешь, меши упрощаешь
+💥 Получаешь: визуальное ухудшение, FPS +2%
+💡 Потому что: viewmode ShaderComplexity показывал красные пиксели от дорогих материалов
+✅ Вместо: viewmode ShaderComplexity → Material Stats → упростить шейдер`,"На интервью":`"Как ты докажешь что сцена GPU-bound, а не CPU-bound?" → stat Unit → GPU ms > CPU ms. Потом r.ScreenPercentage 50 для подтверждения.
+"Почему нельзя просто включить Nanite на все меши?" → Translucent/Masked (ограниченно), WPO, Skeletal — не работает. Сначала понять где bottleneck.
+"Как проверить что оптимизация помогла?" → stat Unit до/после, записать числа. Не полагаться на субъективное ощущение.`}}
+            tabsEn={{"Core Idea":"Optimizing the wrong thing is worse than not optimizing at all: waste time, nothing changes, lose team trust. Four anti-patterns of wrong optimization.","Common Mistakes":`MISTAKE 1: "We're GPU-bound" without stat Unit
+❌ You do: "Need to reduce polycount — rendering is slow"
+💥 Reality: bottleneck is Blueprint Tick on CPU, GPU is idle
+✅ Instead: stat Unit → prove GPU-bound first, then act
+
+MISTAKE 2: Reduced textures, but bottleneck was draw calls
+❌ You do: spend half a day compressing textures 4K→2K
+💥 You get: VRAM better, FPS +0%
+💡 Because: stat scenerendering showed 15000 draw calls
+✅ Instead: profilegpu/stat scenerendering first, then solution
+
+MISTAKE 3: Enabled Nanite, but problem was in material
+❌ You do: enable Nanite on all meshes for "optimization"
+💥 You get: Translucent meshes break, WPO breaks, FPS unchanged
+💡 Because: bottleneck was Translucency pass, Nanite doesn't help there
+✅ Instead: understand what's expensive first (profilegpu), then apply solution
+
+MISTAKE 4: Optimized polycount, but problem was pixel shader
+❌ You do: reduce LOD bias, simplify meshes
+💥 You get: visual degradation, FPS +2%
+💡 Because: viewmode ShaderComplexity showed red pixels from expensive materials
+✅ Instead: viewmode ShaderComplexity → Material Stats → simplify shader`,"In Interview":`"How do you prove the scene is GPU-bound, not CPU-bound?" → stat Unit → GPU ms > CPU ms. Then r.ScreenPercentage 50 to confirm.
+"Why can't you just enable Nanite on all meshes?" → Translucent/Masked (limited), WPO, Skeletal — doesn't work. Understand the bottleneck first.
+"How do you verify optimization worked?" → stat Unit before/after, record numbers. Don't rely on subjective feeling.`}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Async Loading · Streaming Hitches · Asset Management":"Async Loading · Streaming Hitches · Asset Management"} tag="★ advanced">
+            <LearnCard tabs={{"Суть":"Async Loading = загрузка ассетов в фоне без блокировки игрового потока. Streaming hitch = момент когда async load завершается в игровом потоке. Asset dependency chains = цепочки hard references которые затягивают в память лишнее.","На интервью":`Async Load: UAssetManager::GetStreamableManager().RequestAsyncLoad(SoftPath, Callback). Callback вызывается когда ассет загружен. Streaming hitch признаки: stat Hitches, LogSlowTasks Warning. Причины hitches: 1) Синхронный load в игровом потоке (LoadObject). 2) Async load завершился и callback тяжёлый. 3) GC во время streaming. Решение: RequestAsyncLoad до того как нужен ассет (preloading). Flush Streaming (ForceSynchronousLoad) = синхронный = hitch = только для загрузочных экранов. Asset Management Framework: Primary Asset Types + Asset Bundles = управляемый streaming.`,"Зачем":"LoadObject в игровом коде = синхронный stall = hitch. RequestAsyncLoad = фоновая загрузка, callback по готовности. Правило для TA: никогда не используй LoadObject в gameplay коде."}}
+            tabsEn={{"Core Idea":"Async Loading = loading assets in background without blocking game thread. Streaming hitch = moment when async load completes on game thread. Asset dependency chains = hard reference chains that pull unnecessary assets into memory.","In Interview":`Async Load: UAssetManager::GetStreamableManager().RequestAsyncLoad(SoftPath, Callback). Callback fires when asset is loaded. Streaming hitch symptoms: stat Hitches, LogSlowTasks Warning. Hitch causes: 1) Synchronous load on game thread (LoadObject). 2) Async load completed and callback is heavy. 3) GC during streaming. Solution: RequestAsyncLoad before asset is needed (preloading). Flush Streaming = synchronous = hitch = loading screens only. Asset Management Framework: Primary Asset Types + Asset Bundles = managed streaming.`,"Why":"LoadObject in gameplay code = synchronous stall = hitch. RequestAsyncLoad = background load, callback on ready. Rule for TA: never use LoadObject in gameplay code."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Дерево решений оптимизации — процесс мышления":"Optimization Decision Tree — The Thinking Process"} tag="★★ core">
+            <LearnCard tabs={{"Суть":"Хороший техарт не угадывает — он доказывает. Пять вопросов которые нужно задать себе перед любой оптимизацией: Что именно тормозит? Как я это докажу? Какой самый дешёвый фикс? Как проверить что фикс сработал? Как не сломать качество?","Как работает":`FPS LOW — НАЧИНАЕМ ЗДЕСЬ:
+
+ШАГИ 1-2: ДОКАЗАТЬ bottleneck
+  stat Unit → смотри GPU/Game/CPU ms
+  │
+  ├─ GPU ms наибольший → GPU-BOUND
+  │    Доказательство: r.ScreenPercentage 50
+  │    FPS вырос → да, GPU-bound
+  │    │
+  │    ├─ profilegpu → Base Pass дорогой
+  │    │    → ShaderComplexity → упростить материалы
+  │    │
+  │    ├─ profilegpu → много draw calls  
+  │    │    → HISM / batching / Nanite
+  │    │
+  │    └─ profilegpu → Translucency дорогой
+  │         → QuadOverdraw → Masked вместо Translucent
+  │
+  ├─ Game ms наибольший → CPU-BOUND
+  │    Доказательство: stat game → Game Thread
+  │    │
+  │    ├─ Blueprint Tick → Unreal Insights → CPU
+  │    │    → делегаты вместо Tick
+  │    │
+  │    └─ Draw call count → stat scenerendering
+  │         → batching / instancing
+  │
+  └─ Memory hitch / streaming → MEMORY
+       Unreal Insights → Memory track
+       memreport -full → найти тяжёлые ассеты
+       Reference Viewer → hard ref chains
+
+ШАГ 3: САМЫЙ ДЕШЁВЫЙ ФИКС ПЕРВЫМ
+  Не рефакторить архитектуру если поможет LODBias
+  Не переписывать шейдер если поможет channel packing
+  
+ШАГ 4: ВЕРИФИЦИРОВАТЬ
+  stat Unit до/после (записать числа)
+  Не полагаться на субъективное ощущение
+  
+ШАГ 5: ПРОВЕРИТЬ КАЧЕСТВО
+  Сравнить скриншоты до/после
+  Проверить edge cases (ночь, туман, крупный план)`,"На интервью":`"Как ты подходишь к оптимизации?" → "Сначала stat Unit чтобы понять CPU или GPU-bound. Потом профилирую конкретный bottleneck. Применяю самый дешёвый фикс. Верифицирую числами."
+Ключевое: показать системность. Не "я снизил polycount", а "я сначала измерил, потом нашёл что дорого, потом исправил минимальным изменением".`}}
+            tabsEn={{"Core Idea":"Good TA doesn't guess — they prove. Five questions to ask before any optimization: What exactly is slow? How do I prove it? What's the cheapest fix? How do I verify the fix worked? How do I not break quality?","How It Works":`FPS LOW — START HERE:
+
+STEPS 1-2: PROVE the bottleneck
+  stat Unit → check GPU/Game/CPU ms
+  │
+  ├─ GPU ms highest → GPU-BOUND
+  │    Proof: r.ScreenPercentage 50
+  │    FPS increased → yes, GPU-bound
+  │    │
+  │    ├─ profilegpu → Base Pass expensive
+  │    │    → ShaderComplexity → simplify materials
+  │    │
+  │    ├─ profilegpu → many draw calls
+  │    │    → HISM / batching / Nanite
+  │    │
+  │    └─ profilegpu → Translucency expensive
+  │         → QuadOverdraw → Masked instead of Translucent
+  │
+  ├─ Game ms highest → CPU-BOUND
+  │    Proof: stat game → Game Thread
+  │    │
+  │    ├─ Blueprint Tick → Unreal Insights → CPU
+  │    │    → delegates instead of Tick
+  │    │
+  │    └─ Draw call count → stat scenerendering
+  │         → batching / instancing
+  │
+  └─ Memory hitch / streaming → MEMORY
+       Unreal Insights → Memory track
+       memreport -full → find heavy assets
+       Reference Viewer → hard ref chains
+
+STEP 3: CHEAPEST FIX FIRST
+  Don't refactor architecture if LODBias fixes it
+  Don't rewrite shader if channel packing fixes it
+
+STEP 4: VERIFY
+  stat Unit before/after (record numbers)
+  Don't rely on subjective feeling
+
+STEP 5: CHECK QUALITY
+  Compare screenshots before/after
+  Check edge cases (night, fog, close-up)`,"In Interview":`"How do you approach optimization?" → "First stat Unit to understand CPU vs GPU-bound. Then profile the specific bottleneck. Apply the cheapest fix. Verify with numbers."
+Key: show systematic thinking. Not "I reduced polycount", but "I measured first, found what's expensive, fixed it with minimum change".`}}/>
+          </Section>
+
+    </>)}
 
         {active==="materials"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.purple,letterSpacing:3,marginBottom:4}}>МОДУЛЬ · МАТЕРИАЛЫ</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>Материалы и PBR</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>PBR теория, Material Graph, Instances, Functions, WPO.</p></div>
           <Section title={lang==='ru'?"PBR Playground — интерактивный материал":"PBR Playground — Interactive Material"} tag="★ pbr">
             <LearnCard tabs={{"Суть":"PBR (Physically Based Rendering) — материалы основанные на физике. Два ключевых параметра: Metallic (металл или диэлектрик) и Roughness (гладкость поверхности). Всё остальное вытекает из физических уравнений.","Energy Conservation":"Поверхность не может излучать больше света чем получает. Если много diffuse — мало specular и наоборот. Metallic=1 убирает diffuse полностью — все фотоны уходят в specular (металл не рассеивает).","На интервью":"Metallic workflow: 0=диэлектрик (дерево, камень, кожа), 1=металл (золото, железо). Промежуточных значений нет в природе. F0 (base reflectance): диэлектрики ≈ 0.04 (4%), металлы = albedo color. Fresnel — всё отражает под острым углом (grazing angle)."}}/><PBRPlayground/></Section>
           <Section title={lang==='ru'?"Material Graph и компиляция в HLSL":"Material Graph & Compilation to HLSL"} tag="material graph"><LearnCard tabs={{"Суть":"Material Graph в UE5 — визуальный редактор HLSL шейдеров. Каждый нод = операция. При сохранении UE компилирует граф в HLSL код который можно посмотреть через Window → HLSL Code.","Material Instance":"Instance наследует граф родителя и меняет только exposed параметры. Нет перекомпиляции шейдера — только обновление constant buffer. Dynamic Material Instance (DMI) позволяет менять параметры в рантайме из Blueprint.","На интервью":"Material Function = reusable subgraph. WPO (World Position Offset) = смещение вершин в Vertex Shader — ветер, вода, разрушения. Custom HLSL нод — вставка кода напрямую. Layered Materials: LandscapeLayerBlend нод для террейна."}}/><MaterialGraph/></Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"Blend Modes — Opaque · Masked · Translucent · Additive":"Blend Modes — Opaque · Masked · Translucent · Additive"} tag="★ core">
+            <LearnCard tabs={{"Суть":"Opaque: пишет depth, самый быстрый, работает с Nanite. Masked: clip() где маска < threshold — пишет depth только там где видно, работает с Nanite (UE5.1+). Translucent: не пишет depth, отдельный forward pass, сортировка back-to-front, не работает с Nanite. Additive: добавляет цвет поверх.","На интервью":`Правило выбора: трава/листья/сетка/забор = Masked (пишет depth = дешевле). Огонь/взрывы/VFX particles = Additive (нет сортировки нужна). Стекло/вода/туман = Translucent (нужна сортировка). Никогда не ставь Translucent где хватает Masked — Translucent запускает отдельный forward rendering pass без G-Buffer. Two-Sided Foliage = Masked shading model для листьев с правильным scattering.`,"Зачем":"Translucent обходит весь deferred pipeline = каждый объект освещается отдельно forward-renderer. Накладные слои = overdraw. Masked дешевле: пишет depth = early-z тест убивает скрытые пиксели до PS."}}
+            tabsEn={{"Core Idea":"Opaque: writes depth, fastest, works with Nanite. Masked: clip() where mask < threshold — writes depth only where visible, works with Nanite (UE5.1+). Translucent: no depth write, separate forward pass, back-to-front sorting, no Nanite. Additive: adds color on top.","In Interview":`Selection rule: grass/leaves/mesh/fence = Masked (writes depth = cheaper). Fire/explosions/VFX = Additive (no sorting needed). Glass/water/fog = Translucent (sorting required). Never use Translucent where Masked works — Translucent triggers separate forward rendering pass without G-Buffer. Two-Sided Foliage = Masked shading model for leaves with correct scattering.`,"Why":"Translucent bypasses entire deferred pipeline = each object lit separately in forward. Stacked layers = overdraw. Masked cheaper: writes depth = early-z test kills hidden pixels before PS."}}/>
+                        <BlendModesViz/>
+</Section>
+
+          <Section title={lang==='ru'?"Material Domains · Material Functions · MPC":"Material Domains · Material Functions · MPC"} tag="core">
+            <LearnCard tabs={{"Суть":"Domain определяет контекст использования: Surface (меши), User Interface (UMG), Post Process (PP эффекты), Deferred Decal (наклейки на геометрию). Material Function = переиспользуемый субграф. MPC (Material Parameter Collection) = глобальные параметры видимые всем материалам.","На интервью":`Domain: Surface — G-Buffer outputs (Base Color, Normal, Metallic, Roughness). UI — только Final Color, нет World Position. Post Process — SceneTexture доступ. Decal — пишет в G-Buffer. Material Function: Content Browser → Material Function, FunctionInput/FunctionOutput ноды, изменение = обновляет все использующие. MPC: создать MPC asset, добавить параметры, в материале нод Collection Parameter → читать. SetVectorParameterValue на MPC из BP = обновляет ВСЕ материалы мира.`,"Зачем":"Surface материал в UMG = чёрный экран. MPC для time-of-day: меняешь один Float в MPC = небо, трава, вода, постпроцесс меняются одновременно без обхода всех DMI."}}
+            tabsEn={{"Core Idea":"Domain defines usage context: Surface (meshes), User Interface (UMG), Post Process (PP effects), Deferred Decal (stickers on geometry). Material Function = reusable subgraph. MPC (Material Parameter Collection) = global parameters visible to all materials.","In Interview":`Domain: Surface — G-Buffer outputs (Base Color, Normal, Metallic, Roughness). UI — Final Color only, no World Position. Post Process — SceneTexture access. Decal — writes to G-Buffer. Material Function: Content Browser → Material Function, FunctionInput/FunctionOutput nodes, changing it updates all users. MPC: create MPC asset, add params, Collection Parameter node in material. SetVectorParameterValue on MPC from BP = updates ALL world materials.`,"Why":"Surface material in UMG = black screen. MPC for time-of-day: change one Float in MPC = sky, grass, water, post-process all update simultaneously without iterating all DMIs."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Texture Sampling Cost · Channel Packing · Material Debug":"Texture Sampling Cost · Channel Packing · Material Debug"} tag="★ optimization">
+            <LearnCard tabs={{"Суть":"Texture sample = cache miss (ждём VRAM) + фильтрация (bilinear=4 выборки, aniso=до 16) + декомпрессия. Channel packing: 4 grayscale в RGBA = 1 sample вместо 4. Shader Complexity: viewmode ShaderComplexity — зелёный=дёшево, красный=дорого.","На интервью":`Channel packing: R=Roughness G=Metallic B=AO A=EmissiveMask. Отключи sRGB! Используй BC5 для Normal Map (RG каналы, лучше качество). Процедурно: frac(UV*N) вместо tile-текстуры. Material Stats: Window → Stats в Material Editor — Instruction Count, Texture Samples. HLSL output: Window → HLSL Code — видно что реально компилируется. viewmode QuadOverdraw — накладные слои. Platform Stats для мобайл.`,"Аналогия":"Texture sample = поездка в магазин. Если нужно 4 продукта и у каждого свой магазин = 4 поездки. Channel packing = взять всё в одном магазине = 1 поездка."}}
+            tabsEn={{"Core Idea":"Texture sample = cache miss (wait for VRAM) + filtering (bilinear=4 samples, aniso=up to 16) + decompression. Channel packing: 4 grayscale into RGBA = 1 sample instead of 4. Shader Complexity: viewmode ShaderComplexity — green=cheap, red=expensive.","In Interview":`Channel packing: R=Roughness G=Metallic B=AO A=EmissiveMask. Disable sRGB! Use BC5 for Normal Map (RG channels, better quality). Procedural: frac(UV*N) instead of tile-texture. Material Stats: Window → Stats in Material Editor — Instruction Count, Texture Samples. HLSL output: Window → HLSL Code — see what actually compiles. viewmode QuadOverdraw — stacked layers. Platform Stats for mobile.`,"Analogy":"Texture sample = trip to the store. If you need 4 items from 4 different stores = 4 trips. Channel packing = get everything at one store = 1 trip."}}/>
+                        <ChannelPackingViz/>
+</Section>
+
+  
+          <Section title={lang==='ru'?"⚠ Типичные ошибки в Materials":"⚠ Common Material Mistakes"} tag="★ mistakes">
+            <LearnCard tabs={{"Суть":"Пять ошибок которые делают все. Каждая либо убивает performance, либо делает материальную систему неуправляемой. Знание этих ошибок = половина оптимизации.","Ошибки":`ОШИБКА 1: Static Switch для UI-вариации
+❌ Делаешь: Static Switch "is_health_low" в health bar материале
+💥 Получаешь: 2^N permutations, долгий cook, PSO explosion
+✅ Вместо: Scalar Parameter + lerp в рантайме = один шейдер
+
+ОШИБКА 2: Translucent вместо Masked
+❌ Делаешь: листья/сетки/трава на Translucent
+💥 Получаешь: отдельный forward pass, no Nanite, sorting artifacts
+✅ Вместо: Masked + clip() = depth write + Nanite совместимость
+
+ОШИБКА 3: Один Master Material на всё
+❌ Делаешь: один гигантский master материал для всей игры
+💥 Получаешь: 2-5 минут компиляции, 1000+ permutations, хаос
+✅ Вместо: несколько специализированных master по типу (prop, character, environment)
+
+ОШИБКА 4: Texture mask вместо процедурной математики
+❌ Делаешь: circle_mask.png для round gradient
+💥 Получаешь: лишний texture sample, cache miss, VRAM overhead
+✅ Вместо: 1-length(UV-0.5)*2 = идеальный круг без текстуры
+
+ОШИБКА 5: Blur в UI Material без Retainer Box
+❌ Делаешь: Gaussian blur шейдер напрямую на виджете
+💥 Получаешь: полный экран пикселей через дорогой PS каждый кадр
+✅ Вместо: Retainer Box + RenderOnPhase(3) + blur Material = 1/3 стоимости`,"На интервью":`"Что произойдёт если поставить Translucent на листья?" → Overdraw, no depth write, no Nanite, sorting pain.
+"Чем Static Switch отличается от Scalar Parameter?" → Static = permutation (zero runtime, больше compile). Scalar = constant buffer (один шейдер, быстро меняется).
+"Что плохого в одном Master Material на всю игру?" → Комбинаторный взрыв permutations, неуправляемый граф, долгая компиляция.`}}
+            tabsEn={{"Core Idea":"Five mistakes everyone makes. Each either kills performance or makes the material system unmanageable. Knowing these mistakes = half of optimization.","Common Mistakes":`MISTAKE 1: Static Switch for UI variation
+❌ You do: Static Switch "is_health_low" in health bar material
+💥 You get: 2^N permutations, long cook, PSO explosion
+✅ Instead: Scalar Parameter + lerp at runtime = one shader
+
+MISTAKE 2: Translucent instead of Masked
+❌ You do: leaves/meshes/grass on Translucent
+💥 You get: separate forward pass, no Nanite, sorting artifacts
+✅ Instead: Masked + clip() = depth write + Nanite compatible
+
+MISTAKE 3: One Master Material for everything
+❌ You do: one giant master material for entire game
+💥 You get: 2-5 min compilation, 1000+ permutations, chaos
+✅ Instead: several specialized masters by type (prop, character, env)
+
+MISTAKE 4: Texture mask instead of procedural math
+❌ You do: circle_mask.png for round gradient
+💥 You get: extra texture sample, cache miss, VRAM overhead
+✅ Instead: 1-length(UV-0.5)*2 = perfect circle, zero texture
+
+MISTAKE 5: Blur in UI Material without Retainer Box
+❌ You do: Gaussian blur shader directly on widget
+💥 You get: full screen pixels through expensive PS every frame
+✅ Instead: Retainer Box + RenderOnPhase(3) + blur Material = 1/3 cost`,"In Interview":`"What happens if you use Translucent on leaves?" → Overdraw, no depth write, no Nanite, sorting pain.
+"How does Static Switch differ from Scalar Parameter?" → Static = permutation (zero runtime, more compile). Scalar = constant buffer (one shader, changes fast).
+"What's wrong with one Master Material for the whole game?" → Combinatorial permutation explosion, unmanageable graph, slow compilation.`}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Material Attributes · Layered Materials":"Material Attributes · Layered Materials"} tag="advanced">
+            <LearnCard tabs={{"Суть":"Material Attributes = структура данных содержащая все G-Buffer выходы (BaseColor, Normal, Metallic, Roughness...). Позволяет передавать весь материал как один пин. Layered Materials = blend нескольких Material Attributes по маске.","На интервью":`Make Material Attributes: в Material Graph включить Use Material Attributes. Теперь один выход = все параметры. Break/Set Material Attributes ноды для извлечения/изменения отдельных каналов. Blend Material Attributes: lerp между двумя наборами атрибутов по Alpha маске. Landscape Layer Blend нод = управляет слоями по vertex paint весам. Layered material пример: Base layer (камень) + Detail layer (трава) + Macro layer (общий tint) = blend по маске. Преимущество: каждый слой = отдельная Material Function, легко reuse.`,"Зачем":"Material Attributes workflow позволяет создавать сложные layered системы без дублирования кода. Каждый слой — отдельная MF. Blend = один нод. Ландшафты без этого = одна огромная нода на весь граф."}}
+            tabsEn={{"Core Idea":"Material Attributes = data structure containing all G-Buffer outputs (BaseColor, Normal, Metallic, Roughness...). Lets you pass the entire material as one pin. Layered Materials = blend multiple Material Attributes by mask.","In Interview":`Enable Material Attributes: in Material Graph enable Use Material Attributes. Now one output = all parameters. Break/Set Material Attributes nodes to extract/change individual channels. Blend Material Attributes: lerp between two attribute sets by Alpha mask. Landscape Layer Blend node = controls layers by vertex paint weights. Layered material example: Base layer (rock) + Detail layer (grass) + Macro layer (tint) = blend by mask. Advantage: each layer = separate Material Function, easy reuse.`,"Why":"Material Attributes workflow enables complex layered systems without code duplication. Each layer = separate MF. Blend = one node. Landscapes without this = one huge node for the whole graph."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Landscape Materials · DMI Lifecycle · Quality Levels":"Landscape Materials · DMI Lifecycle · Quality Levels"} tag="advanced">
+            <LearnCard tabs={{"Суть":"Landscape Material: использует Landscape Layer Blend + Landscape Layer Coords. Каждый слой = отдельный материал blended по weight map. DMI (Dynamic Material Instance) lifecycle: Create → Set Parameters → когда уничтожать. Quality Levels: Low/Medium/High/Epic переключение через Quality Switch нод.","На интервью":`Landscape Material: Landscape Layer Blend type=Weight Blend (нормализует суммы слоёв). Auto Radialmask (автоблендинг). Triplanar mapping для скал без UV distortion. DMI lifecycle: CreateDynamicMaterialInstance → SetScalarParameterValue → материал живёт пока виджет/меш жив. Не создавать DMI каждый кадр (expensive). Кешировать референс. Quality Switch нод: Low path = простой шейдер, High path = normal map + detail. Scalability Groups в Project Settings → Engine Scalability Settings. r.MaterialQualityLevel 0/1/2 в рантайме.`,"Зачем":"Landscape без слоёв = невозможно управлять terrain painting. DMI lifecycle: создание дорого, изменение дёшево. Quality levels = разница между мобайл (100 инструкций) и PC (400 инструкций) в одном материале."}}
+            tabsEn={{"Core Idea":"Landscape Material: uses Landscape Layer Blend + Landscape Layer Coords. Each layer = separate material blended by weight map. DMI lifecycle: Create → Set Parameters → when to destroy. Quality Levels: Low/Medium/High/Epic switching via Quality Switch node.","In Interview":`Landscape Material: Landscape Layer Blend type=Weight Blend (normalizes layer sums). Auto Radialmask (auto blending). Triplanar mapping for rocks without UV distortion. DMI lifecycle: CreateDynamicMaterialInstance → SetScalarParameterValue → material lives as long as widget/mesh lives. Don't create DMI every frame (expensive). Cache the reference. Quality Switch node: Low path = simple shader, High path = normal map + detail. Scalability Groups in Project Settings → Engine Scalability Settings. r.MaterialQualityLevel 0/1/2 at runtime.`,"Why":"Landscape without layers = impossible to manage terrain painting. DMI lifecycle: creation expensive, modification cheap. Quality levels = difference between mobile (100 instructions) and PC (400 instructions) in one material."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Mobile Material Precision · Shader Permutations в UE":"Mobile Material Precision · Shader Permutations in UE"} tag="mobile">
+            <LearnCard tabs={{"Суть":"Mobile GPU использует half precision (fp16) по умолчанию для многих операций. float ≠ half на мобайл: нормали и позиции требуют full precision. Shader permutations в UE material system: каждая уникальная комбинация Static Switch = отдельная permutation.","На интервью":`Mobile precision: Material Editor → Mobile → Full Precision нод для критичных вычислений. Без него позиционные артефакты на мобайл (float16 = 3 знака вместо 7). Признаки проблемы: blocky shadows, UV swimming на дальних объектах. Permutation cost: viewmode StaticMeshes → MaterialPermutationCount. Много permutations = долгий cook + большой PSO cache + долгие hitches при первом рендере. Правило: Static Switch только для major features. Dynamic parameters для tweaks. Shader compilation budget: mobile < 100 instructions PS, console < 300, PC < 600 для сложных.`,"Зачем":"Half precision на мобайл = 2× производительность для большинства операций, но артефакты где нужна точность. Понимание permutation cost = правильный дизайн material system."}}
+            tabsEn={{"Core Idea":"Mobile GPU uses half precision (fp16) by default for many operations. float ≠ half on mobile: normals and positions require full precision. Shader permutations in UE material system: each unique Static Switch combination = separate permutation.","In Interview":`Mobile precision: Material Editor → Mobile → Full Precision node for critical calculations. Without it: positional artifacts on mobile (float16 = 3 digits instead of 7). Symptoms: blocky shadows, UV swimming on distant objects. Permutation cost: viewmode StaticMeshes → MaterialPermutationCount. Many permutations = long cook + large PSO cache + hitches on first render. Rule: Static Switch only for major features. Dynamic parameters for tweaks. Shader compilation budget: mobile < 100 instructions PS, console < 300, PC < 600 for complex.`,"Why":"Half precision on mobile = 2× performance for most operations, but artifacts where precision is needed. Understanding permutation cost = correct material system design."}}/>
+          </Section>
+
+    </>)}
 
         {active==="lighting"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.yellow,letterSpacing:3,marginBottom:4}}>МОДУЛЬ · ОСВЕЩЕНИЕ</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>Теория освещения</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>Direct lighting, GI, IBL, Spherical Harmonics, Shadow Maps, типы источников.</p></div>
           <Section title={lang==='ru'?"Direct Lighting · Indirect · Типы источников · Тени":"Direct · Indirect · Light Types · Shadows"} tag="lighting"><LearnCard tabs={{"Суть":"Освещение = Direct (прямой свет от источника) + Indirect (отражённый, GI). Direct считается аналитически (Lambert, PBR). Indirect — либо запечённый (lightmaps), либо динамический (Lumen, SSAO, IBL).","Spherical Harmonics":"SH — способ хранить low-frequency освещение с любого направления в нескольких коэффициентах. L1 SH = 4 числа, L2 = 9 чисел. Lumen использует SH для ambient GI. Sample в шейдере = одна dot product операция.","На интервью":"IBL: diffuse IBL = convolved cubemap (все направления смешаны). Specular IBL = mip уровни по roughness + BRDF LUT. Split-sum approximation в UE5. Shadow Maps: рендер сцены от источника → depth texture → сравнение при основном рендере."}}/><LightingTheory/></Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"Lambert · Blinn-Phong · GGX/Cook-Torrance":"Lambert · Blinn-Phong · GGX/Cook-Torrance"} tag="★ theory">
+            <LearnCard tabs={{"Суть":"Lambert Diffuse = saturate(dot(N,L)) — свет пропорционален косинусу угла между нормалью и направлением к свету. Blinn-Phong Specular = pow(dot(N,H), shininess) где H = normalize(L+V). GGX (Trowbridge-Reitz) — современная NDF для PBR, правильное распределение микрограней.","На интервью":`Lambert: float diffuse = saturate(dot(N, L)). Blinn-Phong: float3 H = normalize(L+V); float spec = pow(saturate(dot(N,H)), shininess). GGX NDF: D = a²/(PI*((dot(N,H)²*(a²-1)+1)²)). В Cook-Torrance: BRDF = D*F*G/(4*dot(N,L)*dot(N,V)). D=NDF(microfacet distribution), F=Fresnel, G=Geometry(shadowing/masking). UE5 использует GGX для D, Schlick для F, Smith для G.`,"Зачем":"Lambert — база любого lighting. Blinn-Phong — быстро, не физкорректен (бесконечный specular при острых углах). GGX — физически корректен, правильный хвост highlight, стандарт PBR. Понимание этих моделей = понимание почему материалы выглядят именно так."}}
+            tabsEn={{"Core Idea":"Lambert Diffuse = saturate(dot(N,L)) — light proportional to cosine of angle between normal and light direction. Blinn-Phong Specular = pow(dot(N,H), shininess) where H = normalize(L+V). GGX (Trowbridge-Reitz) — modern NDF for PBR, correct microfacet distribution.","In Interview":`Lambert: float diffuse = saturate(dot(N, L)). Blinn-Phong: float3 H = normalize(L+V); float spec = pow(saturate(dot(N,H)), shininess). GGX NDF: D = a²/(PI*((dot(N,H)²*(a²-1)+1)²)). Cook-Torrance BRDF = D*F*G/(4*dot(N,L)*dot(N,V)). D=NDF, F=Fresnel, G=Geometry(shadowing/masking). UE5 uses GGX for D, Schlick for F, Smith for G.`,"Why":"Lambert = foundation of any lighting. Blinn-Phong = fast, not physically correct (infinite specular at grazing angles). GGX = physically correct, proper highlight tail, PBR standard. Understanding these = understanding why materials look the way they do."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"IBL — Image Based Lighting · BRDF LUT · Split-Sum":"IBL — Image Based Lighting · BRDF LUT · Split-Sum"} tag="★ theory">
+            <LearnCard tabs={{"Суть":"IBL = освещение от окружения через cubemap. Diffuse IBL = свёртка cubemap (все направления усредняются). Specular IBL = иерархические mip (грубый = матовый, чёткий = зеркальный) + BRDF LUT для нормализации. Split-Sum approximation разделяет уравнение рендеринга на два независимых lookup.","На интервью":`Diffuse IBL: для каждого пикселя читаем заранее свёрнутый cubemap по направлению Normal. Specular IBL: читаем cubemap mip = roughness*numMips, затем умножаем на BRDF LUT(NdotV, roughness). Split-Sum: ∫L(l)f(l,v)cos(θ)dl ≈ L_spec(r) * ∫f(l,v)cos(θ)dl. Две части считаются отдельно. В UE5: Reflection Capture Actor запекает кубмапу. Lumen = динамический IBL. Sky Light = IBL от скайбокса.`,"Зачем":"IBL = основа ambient освещения в PBR. Без IBL: металл и диэлектрик выглядят плоско в тёмных областях. Split-Sum позволяет real-time IBL без ray tracing — трейдоф между качеством и производительностью."}}
+            tabsEn={{"Core Idea":"IBL = lighting from environment via cubemap. Diffuse IBL = convolved cubemap (all directions averaged). Specular IBL = hierarchical mips (blurry=matte, sharp=mirror) + BRDF LUT for normalization. Split-Sum approximation separates rendering equation into two independent lookups.","In Interview":`Diffuse IBL: per-pixel read pre-convolved cubemap by Normal direction. Specular IBL: read cubemap mip = roughness*numMips, multiply by BRDF LUT(NdotV, roughness). Split-Sum: ∫L(l)f(l,v)cos(θ)dl ≈ L_spec(r) * ∫f(l,v)cos(θ)dl. Two parts calculated separately. UE5: Reflection Capture Actor bakes cubemap. Lumen = dynamic IBL. Sky Light = IBL from skybox.`,"Why":"IBL = foundation of ambient lighting in PBR. Without IBL: metal and dielectric look flat in dark areas. Split-Sum enables real-time IBL without ray tracing — tradeoff between quality and performance."}}/>
+                        <FresnelViz/>
+</Section>
+
+          <Section title={lang==='ru'?"Shadow Maps · CSM · PCF — как работают тени":"Shadow Maps · CSM · PCF — How Shadows Work"} tag="shadows">
+            <LearnCard tabs={{"Суть":"Shadow Map = рендер сцены с точки зрения источника света → depth texture. Основной рендер: сравниваем depth пикселя с shadow map. Если depth > shadow depth → в тени. CSM (Cascaded Shadow Maps) = несколько shadow maps разных размеров для разных дистанций. PCF = размытие краёв теней через выборку соседних пикселей.","На интервью":`Shadow Map bias = смещение для устранения shadow acne (самозатенение). Слишком большой bias = Peter Panning (тень отрывается). CSM в UE5: Dynamic Shadow Distance (на какой дистанции shadow maps). Cascade Count (1-4). VSM = Virtual Shadow Maps, стандарт с Nanite. VSM разбивает shadow map на страницы, рендерит только видимые. PCF kernel size = контролирует мягкость теней (больше = мягче = дороже).`,"Аналогия":"Shadow map = фотография сцены с фонарика. Если точка дальше от фонарика чем на фотографии — она в тени. CSM = несколько фотографий с разным zoom: близкая высокое разрешение, дальняя — низкое."}}
+            tabsEn={{"Core Idea":"Shadow Map = render scene from light's point of view → depth texture. Main render: compare pixel depth with shadow map. If depth > shadow depth → in shadow. CSM (Cascaded Shadow Maps) = multiple shadow maps of different sizes for different distances. PCF = blur shadow edges by sampling neighboring pixels.","In Interview":`Shadow Map bias = offset to eliminate shadow acne (self-shadowing). Too large bias = Peter Panning (shadow detaches). CSM in UE5: Dynamic Shadow Distance (distance for shadow maps). Cascade Count (1-4). VSM = Virtual Shadow Maps, standard with Nanite. VSM splits shadow map into pages, renders only visible. PCF kernel size = controls shadow softness (larger = softer = more expensive).`,"Analogy":"Shadow map = photo of scene from flashlight. If point is further from flashlight than in photo — it's in shadow. CSM = multiple photos with different zoom: near high resolution, far low resolution."}}/>
+                        <ShadowCascadesViz/>
+</Section>
+
+          <Section title={lang==='ru'?"Light Mobility · Типы источников · Exposure":"Light Mobility · Light Types · Exposure"} tag="ue5-practical">
+            <LearnCard tabs={{"Суть":"Static: полностью запечённый, нет рантаймовой стоимости, только в lightmap. Stationary: запечённые indirect + рантаймовые тени для dynamic. Movable: полностью динамический, дорого. Типы: Directional (солнце), Point (лампочка), Spot (прожектор), Rect Light (панель), Sky Light (IBL). Exposure = авто/мануальная экспозиция для tone mapping.","На интервью":`Static: lightmap только для static meshes. Stationary: не более 4 overlapping stationary lights (иначе будет fully dynamic). Movable: Lumen обрабатывает динамику. Rect Light дорогой (area light = много shadow samples). Sky Light: Real Time Capture = каждый кадр, дорого. Baked = запечённая IBL. Exposure: EV100 = Manual, MinEV/MaxEV для авто. PostProcessVolume: Auto Exposure Bias для тонкой настройки. Lumen Scene Detail = как много объектов Lumen трекает.`,"Зачем":"Неправильная mobility = или нет теней или performance проблемы. Stationary дорог если overlapping > 4. Exposure напрямую влияет на то как PBR материалы выглядят в разных условиях освещения."}}
+            tabsEn={{"Core Idea":"Static: fully baked, zero runtime cost, lightmap only. Stationary: baked indirect + runtime shadows for dynamic objects. Movable: fully dynamic, expensive. Types: Directional (sun), Point (bulb), Spot (projector), Rect Light (panel), Sky Light (IBL). Exposure = auto/manual for tone mapping.","In Interview":`Static: lightmap for static meshes only. Stationary: max 4 overlapping stationary lights (else fully dynamic). Movable: Lumen handles dynamics. Rect Light expensive (area light = many shadow samples). Sky Light: Real Time Capture = every frame, expensive. Baked = pre-baked IBL. Exposure: EV100 = Manual, MinEV/MaxEV for auto. PostProcessVolume: Auto Exposure Bias for fine tuning. Lumen Scene Detail = how many objects Lumen tracks.`,"Why":"Wrong mobility = either no shadows or performance problems. Stationary expensive when overlapping > 4. Exposure directly affects how PBR materials look in different lighting conditions."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Стоимость источников света — что дорого и почему":"Light Cost — What's Expensive and Why"} tag="★ optimization">
+            <LearnCard tabs={{"Суть":"Стоимость источника света определяется: типом (Directional=дёшево, Rect=дорого), мобильностью (Static=free, Movable=дорого), радиусом затухания (больше = больше объектов освещает = дороже), shadow casting (тень = x2-x10 стоимость).","На интервью":`СТОИМОСТЬ ПО ТИПУ (от дешёвого к дорогому):
+Directional Light: один расчёт на весь экран, Shadow = CSM.
+Point Light: сфера influence, 6 shadow faces если с тенью.
+Spot Light: конус, 1 shadow face.
+Rect Light: area light, много shadow samples — ДОРОГО.
+Sky Light: IBL, statics = бесплатно, Movable = пересчёт.
+
+МОБИЛЬНОСТЬ:
+Static: запечено в lightmap, runtime cost = 0.
+Stationary: запечено indirect, runtime dynamic shadows.
+  ⚠ Overlapping > 4 stationary lights = автоматически Movable!
+  Проверить: viewmode LightComplexity — красный = > 4 overlap.
+Movable: полный deferred расчёт каждый кадр.
+
+SHADOW COST:
+Cast Shadows = false где не нужно (заборы, мелкие пропы).
+Dynamic Shadow Distance — дальность shadow map.
+  Меньше дистанция = меньше objects в shadow pass.
+Contact Shadows = дополнительный raycast, дорого везде.
+Volumetric Shadow = очень дорого.`,"На интервью":`"Почему у нас 20 Movable Point Lights на сцене и fps падает?" → Каждый Movable = deferred shading pass + потенциально 6 shadow cube faces. 20 lights × 6 faces = 120 shadow passes.
+"Что такое LightComplexity?" → viewmode LightComplexity — зелёный 1-2 lights, красный > 4 overlapping stationary. > 4 = динамические = дорого.`,"Аналогия":"Свет без тени = посчитать уравнение. Свет с тенью = сначала сфотографировать сцену с точки зрения света, потом посчитать уравнение. Каждая тень = один дополнительный render pass."}}
+            tabsEn={{"Core Idea":"Light cost is determined by: type (Directional=cheap, Rect=expensive), mobility (Static=free, Movable=expensive), attenuation radius (larger = more objects lit = more expensive), shadow casting (shadow = 2-10x cost multiplier).","In Interview":`COST BY TYPE (cheapest to most expensive):
+Directional Light: one calculation for full screen, Shadow = CSM.
+Point Light: sphere of influence, 6 shadow faces if shadow-casting.
+Spot Light: cone, 1 shadow face.
+Rect Light: area light, many shadow samples — EXPENSIVE.
+Sky Light: IBL, static = free, Movable = recalculates.
+
+MOBILITY:
+Static: baked into lightmap, runtime cost = 0.
+Stationary: baked indirect, runtime dynamic shadows.
+  ⚠ Overlapping > 4 stationary lights = auto-becomes Movable!
+  Check: viewmode LightComplexity — red = > 4 overlap.
+Movable: full deferred calculation every frame.
+
+SHADOW COST:
+Cast Shadows = false where not needed (fences, small props).
+Dynamic Shadow Distance — shadow map distance.
+  Shorter = fewer objects in shadow pass.
+Contact Shadows = extra raycast, expensive everywhere.
+Volumetric Shadow = very expensive.`,"In Interview":`"Why do 20 Movable Point Lights kill fps?" → Each Movable = deferred shading pass + up to 6 shadow cube faces. 20 lights × 6 faces = 120 shadow passes.
+"What is LightComplexity?" → viewmode LightComplexity — green 1-2 lights, red > 4 overlapping stationary. > 4 = dynamic = expensive.`,"Analogy":"Light without shadow = solve the equation. Light with shadow = first photograph the scene from the light's point of view, then solve the equation. Each shadow = one additional render pass."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Overlapping Lights · LightComplexity · Attenuation":"Overlapping Lights · LightComplexity · Attenuation"} tag="★ optimization">
+            <LearnCard tabs={{"Суть":"Stationary Light overlapping > 4 = автоматически переключается в Movable режим. viewmode LightComplexity показывает это мгновенно. Attenuation Radius = радиус действия света. Слишком большой radius = свет затрагивает слишком много объектов = дорого.","На интервью":`OVERLAPPING STATIONARY:
+viewmode LightComplexity → красные зоны = проблема.
+Решение: уменьшить Attenuation Radius у overlapping lights.
+Или: сделать некоторые Static (если не двигаются).
+Или: Lumen (не зависит от количества lights).
+
+ATTENUATION RADIUS:
+Правило: минимально необходимый радиус.
+Большой radius → свет влияет на сотни объектов → сотни объектов в lighting pass.
+Use Inverse Square Falloff (физически корректно).
+Light Function = кастомная маска на форму света (дорого!).
+
+ПРАКТИКА:
+Outdoor sun: 1 Directional Stationary + Sky Light Stationary.
+Indoor room: Point/Spot Stationary, radius = размер комнаты.
+Candles: много маленьких — Static с запечённым освещением.
+Moving character light: Movable Point, Cast Shadows = false.
+Portal/neon: Emissive material + Post Process bloom = ноль lights.`,"На интервью":`"Как оптимизировать комнату с 10 лампами?" → Проверить overlap через LightComplexity. Если > 4 overlap — уменьшить Attenuation Radius. Candles/torches = Static. Ключевые — Stationary. Движущиеся = Movable без теней.
+"Нужен ли Cast Shadows на каждом источнике?" → Нет. Маленькие пропы, детали интерьера, декоративные лампы = Cast Shadows false. Тень нужна только там где она заметна.`}}
+            tabsEn={{"Core Idea":"Stationary Light overlapping > 4 = automatically switches to Movable mode. viewmode LightComplexity shows this instantly. Attenuation Radius = light's range. Too large radius = light affects too many objects = expensive.","In Interview":`OVERLAPPING STATIONARY:
+viewmode LightComplexity → red zones = problem.
+Fix: reduce Attenuation Radius on overlapping lights.
+Or: make some Static (if they never move).
+Or: Lumen (not dependent on light count).
+
+ATTENUATION RADIUS:
+Rule: minimum necessary radius.
+Large radius → light affects hundreds of objects → hundreds in lighting pass.
+Use Inverse Square Falloff (physically correct).
+Light Function = custom mask on light shape (expensive!).
+
+PRACTICE:
+Outdoor sun: 1 Directional Stationary + Sky Light Stationary.
+Indoor room: Point/Spot Stationary, radius = room size.
+Candles: many small — Static with baked lighting.
+Moving character light: Movable Point, Cast Shadows = false.
+Portal/neon: Emissive material + Post Process bloom = zero lights.`,"In Interview":`"How do you optimize a room with 10 lamps?" → Check overlap via LightComplexity. If > 4 overlap — reduce Attenuation Radius. Candles/torches = Static. Key lights — Stationary. Moving = Movable without shadows.
+"Does every light need Cast Shadows?" → No. Small props, interior details, decorative lamps = Cast Shadows false. Shadows only where visible.`}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Пайплайн: освещение медленное — диагностика":"Pipeline: Lighting is Slow — Diagnosis"} tag="★★ pipeline">
+            <LearnCard tabs={{"Суть":"Освещение — часть GPU pipeline. Профилировать нужно как и всё остальное: сначала найти конкретный pass, потом исправить. Lighting проблемы бывают трёх типов: слишком много dynamic lights, дорогие тени, дорогой Lumen.","Как работает":`ШАГ 1 — НАЙТИ ЧТО ИМЕННО ДОРОГО:
+profilegpu → смотреть:
+  Lights → дорого → много Movable/Stationary
+  Shadows → дорого → много shadow casting lights
+  Lumen → дорого → Lumen settings слишком высокие
+
+ШАГ 2 — ДИАГНОСТИКА LIGHTS:
+viewmode LightComplexity
+  Красный (> 4 overlapping) → уменьшить Attenuation Radius
+stat Lights → Dynamic Shadow Count
+
+ШАГ 3 — ТИПИЧНЫЕ РЕШЕНИЯ:
+
+Много Movable Point Lights:
+  → Cast Shadows = false где не видно тени
+  → Уменьшить Attenuation Radius
+  → Static где источник не движется
+  → Emissive + bloom вместо декоративных lights
+
+Тени дорогие:
+  → Dynamic Shadow Distance уменьшить (15-30m обычно)
+  → Shadow Resolution снизить
+  → Cast Shadows = false на мелких пропах
+  → Contact Shadows = off где нет необходимости
+
+Lumen дорогой:
+  → r.Lumen.DiffuseIndirect.Allow 0 (отключить если не нужен)
+  → Lumen Scene Detail уменьшить
+  → Final Gather Quality снизить
+  → Software вместо Hardware Ray Tracing
+
+ШАГ 4 — ВЕРИФИЦИРОВАТЬ:
+profilegpu до/после каждого изменения`,"На интервью":`"Как ты будешь оптимизировать освещение на сцене?" → profilegpu → найти Lights или Shadows pass → LightComplexity для overlap → Cast Shadows = false где не нужно → Dynamic Shadow Distance. Lumen отдельно через r.Lumen CVars.`}}
+            tabsEn={{"Core Idea":"Lighting is part of GPU pipeline. Profile it like everything else: find the specific pass, then fix. Lighting problems come in three types: too many dynamic lights, expensive shadows, expensive Lumen.","How It Works":`STEP 1 — FIND WHAT'S EXPENSIVE:
+profilegpu → check:
+  Lights → expensive → many Movable/Stationary
+  Shadows → expensive → many shadow-casting lights
+  Lumen → expensive → Lumen settings too high
+
+STEP 2 — DIAGNOSE LIGHTS:
+viewmode LightComplexity
+  Red (> 4 overlapping) → reduce Attenuation Radius
+stat Lights → Dynamic Shadow Count
+
+STEP 3 — TYPICAL SOLUTIONS:
+
+Many Movable Point Lights:
+  → Cast Shadows = false where shadow not visible
+  → Reduce Attenuation Radius
+  → Static where source doesn't move
+  → Emissive + bloom instead of decorative lights
+
+Expensive shadows:
+  → Reduce Dynamic Shadow Distance (15-30m typical)
+  → Lower Shadow Resolution
+  → Cast Shadows = false on small props
+  → Contact Shadows = off where not needed
+
+Lumen expensive:
+  → r.Lumen.DiffuseIndirect.Allow 0 (disable if not needed)
+  → Reduce Lumen Scene Detail
+  → Lower Final Gather Quality
+  → Software instead of Hardware Ray Tracing
+
+STEP 4 — VERIFY:
+profilegpu before/after every change`,"In Interview":`"How would you optimize lighting on a scene?" → profilegpu → find Lights or Shadows pass → LightComplexity for overlap → Cast Shadows = false where not needed → Dynamic Shadow Distance. Lumen separately via r.Lumen CVars.`}}/>
+          </Section>
+
+    </>)}
 
         
         
@@ -3446,7 +4869,91 @@ float4 main(PSInput IN) : SV_Target {
             <UIEventPatternsSection/>
             <div style={{marginTop:16}}><CommonUISection/></div>
           </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"DPI Scaling · Anchors · Safe Zones":"DPI Scaling · Anchors · Safe Zones"} tag="dpi">
+            <LearnCard tabs={{"Суть":"DPI Scaling = автоматическое масштабирование UI под разные разрешения через DPI Curve (resolution → scale factor). Anchors = точки привязки виджета к родителю (0=лево/верх, 1=право/низ). Safe Zones = отступы для TV overscan и телефонного notch.","На интервью":`DPI Curve: Project Settings → User Interface → DPI Scale Curve. Default: 1080p=1.0, 4K=2.0. ScaleBox = масштабировать дочерний под available space. SizeBox = фиксированный размер в px (не масштабируется). Stretch anchors (min≠max) = виджет тянется с экраном. Safe Zone виджет: обернуть в Safe Zone Widget = автоматические отступы. Common UI управляет DPI через Platform-specific settings.`,"Зачем":"Без правильного DPI: UI выглядит хорошо на 1080p, крошечным на 4K или огромным на мобайл. Неправильные Anchors = кнопки вылетают за экран. Safe Zones обязательны для console certification и iOS."}}
+            tabsEn={{"Core Idea":"DPI Scaling = auto UI scaling for different resolutions via DPI Curve (resolution → scale factor). Anchors = widget attachment points to parent (0=left/top, 1=right/bottom). Safe Zones = margins for TV overscan and phone notch.","In Interview":`DPI Curve: Project Settings → User Interface → DPI Scale Curve. Default: 1080p=1.0, 4K=2.0. ScaleBox = scales child to available space. SizeBox = fixed size in px (doesn't scale). Stretch anchors (min≠max) = widget stretches with screen. Safe Zone widget: wrap in Safe Zone Widget = auto margins. Common UI manages DPI via platform-specific settings.`,"Why":"Without DPI: UI looks good at 1080p, tiny at 4K or huge on mobile. Wrong anchors = buttons fly off screen. Safe zones required for console certification and iOS."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Layout Cost · Canvas Panel · SizeBox vs ScaleBox":"Layout Cost · Canvas Panel · SizeBox vs ScaleBox"} tag="layout">
+            <LearnCard tabs={{"Суть":"Canvas Panel — самый гибкий но дорогой (каждый child = независимый layout pass). VerticalBox/HorizontalBox/Overlay дешевле. Invalidation cascade: изменение размера → перерасчёт всего parent-дерева вверх. Глубокое дерево = дорого.","На интервью":`Canvas Panel antipattern: 100 виджетов с absolute positions = 100 независимых layout passes. Лучше: VerticalBox для списков, HorizontalBox для строк, GridPanel для сеток, Canvas только для overlay. SizeBox = фиксированный size в dp (DPI-independent). ScaleBox = масштабировать содержимое под parent. UniformGridPanel для равных ячеек. Минимизировать вложенность: каждый лишний контейнер = лишний layout pass.`,"Зачем":"Canvas с 100 элементами на мобайл = каждый элемент считает layout независимо = x100 накладные расходы. Правильная иерархия = 5-10× меньше layout time. Это особенно важно в ListView где виджеты переиспользуются."}}
+            tabsEn={{"Core Idea":"Canvas Panel — most flexible but expensive (each child = independent layout pass). VerticalBox/HorizontalBox/Overlay are cheaper. Invalidation cascade: size change → recalculate entire parent tree upward. Deep tree = expensive.","In Interview":`Canvas Panel antipattern: 100 widgets with absolute positions = 100 independent layout passes. Better: VerticalBox for lists, HorizontalBox for rows, GridPanel for grids, Canvas only for overlay. SizeBox = fixed size in dp (DPI-independent). ScaleBox = scale content to parent. UniformGridPanel for equal cells. Minimize nesting: each extra container = extra layout pass.`,"Why":"Canvas with 100 elements on mobile = each element calculates layout independently = 100x overhead. Correct hierarchy = 5-10x less layout time. Especially important in ListView where widgets are recycled."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Input · Focus · Navigation · Gamepad":"Input · Focus · Navigation · Gamepad"} tag="input">
+            <LearnCard tabs={{"Суть":"UMG поддерживает три типа ввода: Mouse/Touch (default), Keyboard navigation, Gamepad. Focus = какой виджет получает ввод. Navigation = как фокус перемещается между виджетами. Common UI управляет routing ввода между активными виджетами в стеке.","На интервью":`SetInputMode: UIOnly (только UI, заблокировать игру), GameAndUI (оба), GameOnly. Focus: SetFocus() на виджет, SetFocusToPreviousWidget(). Navigation: SetNavigationRuleExplicit для кастомных переходов. Gamepad: IsFocusable = true на виджете. bIsFocusable в C++. Navigation Config в Project Settings → Widget. Common UI: CommonActivatableWidget::SetFocus() автоматически. Input Layer приоритет (выше layer = перехватывает ввод раньше). Focus trap: ContainsNavigation в ActivatableWidget.`,"Зачем":"Gamepad navigation без правильного focus = кнопки неактивные. Focus trap нужен для модальных диалогов. Common UI Input Layer нужен для корректного pause menu который не блокирует другие UI."}}
+            tabsEn={{"Core Idea":"UMG supports three input types: Mouse/Touch (default), Keyboard navigation, Gamepad. Focus = which widget receives input. Navigation = how focus moves between widgets. Common UI manages input routing between active widgets in stack.","In Interview":`SetInputMode: UIOnly (UI only, block game), GameAndUI (both), GameOnly. Focus: SetFocus() on widget, SetFocusToPreviousWidget(). Navigation: SetNavigationRuleExplicit for custom transitions. Gamepad: IsFocusable = true on widget, bIsFocusable in C++. Navigation Config: Project Settings → Widget. Common UI: CommonActivatableWidget::SetFocus() automatic. Input Layer priority (higher layer = intercepts input first). Focus trap: ContainsNavigation in ActivatableWidget.`,"Why":"Gamepad navigation without correct focus = buttons inactive. Focus trap needed for modal dialogs. Common UI Input Layer needed for correct pause menu that doesn't block other UI."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Retainer Box — когда помогает, когда вредит":"Retainer Box — When It Helps vs When It Hurts"} tag="★ retainer">
+            <LearnCard tabs={{"Суть":"RenderOnPhase(N,offset) = рендерить каждые N кадров, с offset для разброса нагрузки. RenderOnInvalidation = только при изменении дочерних виджетов. Retainer вредит когда: содержимое меняется каждый кадр, текст внутри, маленькая площадь. Retainer помогает когда: дорогое статичное поддерево, blur/glow через Material.","На интервью":`Когда НЕ использовать: AnimatedText (каждый кадр = двойная работа), HP bar который обновляется каждый тик, маленькая иконка (overhead > savings). Когда использовать: весь экран инвентаря с 50+ иконками (открыт редко), blur эффект через Material, minimap который обновляется раз в 3 кадра. Настройка: RenderOnPhase(3, frameOffset) — каждые 3 кадра с разными offset у разных виджетов распределяет нагрузку. Material в Retainer Box: итоговое изображение → Post-Process материал → blur/color grade. Текст в Retainer Box нечёткий — субпиксельный рендеринг теряется при RT upscale.`,"Зачем":"Неправильно используемый Retainer = в 2 раза ДОРОЖЕ чем без него (рендер в RT + рендер RT на экран каждый кадр). Правильно используемый = значительная экономия для статичных дорогих поддеревьев."}}
+            tabsEn={{"Core Idea":"RenderOnPhase(N,offset) = render every N frames, with offset to spread load. RenderOnInvalidation = only when child widgets change. Retainer hurts when: content changes every frame, text inside, small area. Retainer helps when: expensive static subtree, blur/glow via Material.","In Interview":`When NOT to use: AnimatedText (every frame = double work), HP bar updating every tick, small icon (overhead > savings). When to use: entire inventory screen with 50+ icons (opened rarely), blur effect via Material, minimap updating every 3 frames. Setup: RenderOnPhase(3, frameOffset) — every 3 frames with different offsets for different widgets distributes load. Material in Retainer Box: final image → Post-Process material → blur/color grade. Text in Retainer Box is blurry — sub-pixel rendering lost when RT upscaled.`,"Why":"Incorrectly used Retainer = 2x MORE expensive (render to RT + render RT to screen every frame). Correctly used = significant savings for static expensive subtrees."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Brush · Slate Resource Lifecycle · UI Batching":"Brush · Slate Resource Lifecycle · UI Batching"} tag="advanced">
+            <LearnCard tabs={{"Суть":"Brush = ресурс отображения в Slate (текстура, материал, цвет). Каждый уникальный Brush = потенциальный разрыв batch. UI Batching = объединение виджетов в один draw call. Батч разрывается при: смене материала, смене текстуры, смене blend mode, трансформации (rotation/scale).","На интервью":`Slate Brush lifecycle: создаётся при инициализации виджета, держится пока виджет жив. Dynamic Brush (FSlateDynamicBrush) = обновляется из кода — дорого если каждый кадр. Texture Atlas: несколько текстур в одном атласе = один texture bind = не разрывает batch. UI Batching правила: все Image виджеты с одной текстурой (или без) = один batch. Каждый уникальный Material = отдельный batch. Rotation/Scale на виджете = разрыв batch. r.DumpBatches в консоли = посмотреть текущие batch. Для icon-heavy UI: SpriteAtlas через UPaperSprite или вручную packed atlas texture.`,"Зачем":"Неправильно организованный UI может генерировать 100+ draw calls вместо 5-10. Native Image (без материала) всегда в общий batch. Material = всегда отдельный batch."}}
+            tabsEn={{"Core Idea":"Brush = display resource in Slate (texture, material, color). Each unique Brush = potential batch break. UI Batching = merging widgets into one draw call. Batch breaks on: material change, texture change, blend mode change, widget transform (rotation/scale).","In Interview":`Slate Brush lifecycle: created on widget init, held while widget alive. Dynamic Brush (FSlateDynamicBrush) = updated from code — expensive if every frame. Texture Atlas: multiple textures in one atlas = one texture bind = no batch break. UI Batching rules: all Image widgets with same texture (or none) = one batch. Each unique Material = separate batch. Rotation/Scale on widget = batch break. r.DumpBatches in console = see current batches. For icon-heavy UI: SpriteAtlas via UPaperSprite or manually packed atlas texture.`,"Why":"Poorly organized UI can generate 100+ draw calls instead of 5-10. Native Image (no material) always in shared batch. Material = always separate batch."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"⚠ Типичные ошибки в UI/UMG":"⚠ Common UI/UMG Mistakes"} tag="★ mistakes">
+            <LearnCard tabs={{"Суть":"Пять ошибок которые встречаются в каждом проекте. Первые три — причина 80% UI performance проблем.","Ошибки":`ОШИБКА 1: ScrollBox на 1000 элементов
+❌ Делаешь: ScrollBox с 1000 виджетами для списка игроков
+💥 Получаешь: 1000 NativeConstruct вызовов, 1000 виджетов в памяти
+✅ Вместо: UListView + IUserObjectListEntry = ~20 виджетов всегда
+
+ОШИБКА 2: Text binding на каждый Tick
+❌ Делаешь: Bind функцию к TextBlock для отображения HP
+💥 Получаешь: функция вызывается 60 раз в секунду, Layout invalidation каждый кадр
+✅ Вместо: OnHealthChanged делегат → SetText только при изменении
+
+ОШИБКА 3: Retainer Box на HP bar
+❌ Делаешь: Retainer Box вокруг health bar который меняется каждый кадр
+💥 Получаешь: рендер в RT + рендер RT на экран = в 2 раза дороже чем без Retainer
+✅ Вместо: Retainer только для статичного/редко меняющегося дерева
+
+ОШИБКА 4: Canvas Panel везде
+❌ Делаешь: Canvas Panel как контейнер для всех виджетов
+💥 Получаешь: 100 независимых layout calculation passes
+✅ Вместо: VerticalBox/HorizontalBox/GridPanel для структуры, Canvas только для overlay
+
+ОШИБКА 5: Material Domain Surface вместо User Interface
+❌ Делаешь: создаёшь UI material с Domain = Surface
+💥 Получаешь: чёрный виджет или неправильные цвета
+✅ Вместо: всегда Domain = User Interface для UMG материалов`,"На интервью":`"Почему не надо использовать binding на TextBlock для HP?" → Вызывается каждый тик, invalidation каждый кадр.
+"Когда Retainer Box вреден?" → Когда содержимое меняется каждый кадр — рендер RT + рендер RT на экран = 2× overhead.
+"Чем UListView лучше ScrollBox?" → Виртуализация: ~20 виджетов вместо 1000.`}}
+            tabsEn={{"Core Idea":"Five mistakes found in every project. First three cause 80% of UI performance problems.","Common Mistakes":`MISTAKE 1: ScrollBox with 1000 items
+❌ You do: ScrollBox with 1000 widgets for player list
+💥 You get: 1000 NativeConstruct calls, 1000 widgets in memory
+✅ Instead: UListView + IUserObjectListEntry = ~20 widgets always
+
+MISTAKE 2: Text binding on every Tick
+❌ You do: Bind function to TextBlock for HP display
+💥 You get: function called 60 times/second, Layout invalidation every frame
+✅ Instead: OnHealthChanged delegate → SetText only on change
+
+MISTAKE 3: Retainer Box on HP bar
+❌ You do: Retainer Box around health bar that changes every frame
+💥 You get: render to RT + render RT to screen = 2× more expensive
+✅ Instead: Retainer only for static/rarely changing tree
+
+MISTAKE 4: Canvas Panel everywhere
+❌ You do: Canvas Panel as container for all widgets
+💥 You get: 100 independent layout calculation passes
+✅ Instead: VerticalBox/HorizontalBox/GridPanel for structure, Canvas for overlay only
+
+MISTAKE 5: Material Domain Surface instead of User Interface
+❌ You do: create UI material with Domain = Surface
+💥 You get: black widget or wrong colors
+✅ Instead: always Domain = User Interface for UMG materials`,"In Interview":`"Why not use binding on TextBlock for HP?" → Called every tick, invalidation every frame.
+"When is Retainer Box harmful?" → When content changes every frame — render RT + render RT to screen = 2× overhead.
+"Why is UListView better than ScrollBox?" → Virtualization: ~20 widgets instead of 1000.`}}/>
+          </Section>
+
+    </>)}
 
         {active==="vertex"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.green,letterSpacing:3,marginBottom:4}}>{T[lang].mods.vertex}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.vertex}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.vertex}</p></div>
@@ -3490,7 +4997,35 @@ float4 main(PSInput IN) : SV_Target {
             tabsEn={{"Core Idea":"Render Target — texture GPU renders into directly. Can be a material input in the next frame. Ping-pong pattern: two RTs alternate — one read, one written, roles swap each frame.","Analogy":"Render Target like a classroom chalkboard: GPU writes on it, then it's photographed (used as texture), then written over again. Ping-pong: two boards — while one is being written, reading from the photo of the other.","In Interview":"Create: Content Browser → Render Target. In Blueprint: Draw Material To Render Target (or via SceneCapture2D). Used as TextureParameter in material. Choose resolution and format per task: R32f for depth simulations, RGBA8 for color."}}/>
             <RenderTargetSection/>
           </Section>
-        </>)}
+      
+          <Section title={lang==='ru'?"Custom Depth Outline — алгоритм шаг за шагом":"Custom Depth Outline — Step by Step Algorithm"} tag="★ technique">
+            <LearnCard tabs={{"Суть":"Custom Depth = отдельный depth pass для выделенных объектов. Custom Stencil = 8-bit ID на актора. PP материал сравнивает CustomDepth с SceneDepth соседних пикселей → граница = outline.","На интервью":`Алгоритм: 1) Actor → Render CustomDepth Pass = true, Custom Stencil Value = 1..255. 2) PP Material Domain = Post Process. 3) Семплируй SceneTexture:CustomDepth в ±1px offsets. 4) Если сосед=CustomDepth объект, текущий нет → граница. 5) lerp(sceneColor, outlineColor, isOutline). X-Ray через объекты: если SceneDepth > CustomDepth → объект за стеной → рисовать. Включить: Project Settings → Rendering → Custom Depth-Stencil Pass.`,"Зачем":"Outline без Custom Depth = невозможно (нет информации о конкретных объектах). Custom Stencil позволяет разные цвета для врагов (Value=1) и союзников (Value=2). Стандарт в современных играх."}}
+            tabsEn={{"Core Idea":"Custom Depth = separate depth pass for selected objects. Custom Stencil = 8-bit ID per actor. PP material compares CustomDepth with SceneDepth of adjacent pixels → boundary = outline.","In Interview":`Algorithm: 1) Actor → Render CustomDepth Pass = true, Custom Stencil Value = 1..255. 2) PP Material Domain = Post Process. 3) Sample SceneTexture:CustomDepth at ±1px offsets. 4) If neighbor = CustomDepth object, current is not → boundary. 5) lerp(sceneColor, outlineColor, isOutline). X-Ray through objects: if SceneDepth > CustomDepth → object behind wall → draw. Enable: Project Settings → Rendering → Custom Depth-Stencil Pass.`,"Why":"Outline without Custom Depth = impossible (no info about specific objects). Custom Stencil allows different colors for enemies (Value=1) vs allies (Value=2). Standard approach in modern games."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Dissolve · Hit Flash · Depth Fade — классические техники":"Dissolve · Hit Flash · Depth Fade — Classic Techniques"} tag="techniques">
+            <LearnCard tabs={{"Суть":"Dissolve = clip(noise - dissolveAmount, 0) для пошагового исчезновения. Hit Flash = Emissive parameter + DMI (SetScalarParameter('Flash', 1→0)). Depth Fade = SceneTexture:SceneDepth - PixelDepth для мягких краёв частиц на пересечении с геометрией.","На интервью":`Dissolve: noise/frac + параметр DissolveAmount (0=полный, 1=нет). clip() = Masked blendmode. Edge glow: saturate((noise - dissolveAmount) * hardness) * glowColor. Hit Flash: MaterialDynamic SetScalarParameter('Flash', 1.0) → Blueprint TimeLine 1→0 → SetScalarParameter каждый tick. Depth Fade: DepthFade нод в UE5 уже готов. Soft Particles: включить Soft Particle Depth в Particle System.`,"Зачем":"Dissolve — обязательная техника для смерти, телепортации, появления. Hit Flash = базовый visual feedback для урона. Soft Particles = разница между профессиональным VFX и любительским (резкие края на пересечении)."}}
+            tabsEn={{"Core Idea":"Dissolve = clip(noise - dissolveAmount, 0) for gradual disappearance. Hit Flash = Emissive parameter + DMI (SetScalarParameter('Flash', 1→0)). Depth Fade = SceneTexture:SceneDepth - PixelDepth for soft particle edges at geometry intersection.","In Interview":`Dissolve: noise/frac + DissolveAmount param (0=full, 1=none). clip() = Masked blendmode. Edge glow: saturate((noise - dissolveAmount) * hardness) * glowColor. Hit Flash: MaterialDynamic SetScalarParameter('Flash', 1.0) → Blueprint Timeline 1→0 → SetScalarParameter each tick. Depth Fade: DepthFade node in UE5 built-in. Soft Particles: enable Soft Particle Depth in Particle System.`,"Why":"Dissolve = essential technique for death, teleportation, summoning. Hit Flash = basic visual feedback for damage. Soft Particles = difference between professional VFX and amateur (hard edges at geometry intersection)."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Niagara: Bounds · Pooling · Scalability · GPU Limits":"Niagara: Bounds · Pooling · Scalability · GPU Limits"} tag="niagara">
+            <LearnCard tabs={{"Суть":"Bounds = bounding box системы частиц. Если bounds вне frustum = система culled (не рендерится). Фиксированные bounds важны для GPU эмиттеров. Pooling = переиспользование систем вместо создания/удаления. Scalability = scalability groups для автоматического снижения качества.","На интервью":`Bounds: Fixed Bounds для GPU emitter (нет bounds = всегда render, performance проблема). Calculated Bounds = CPU вычисляет каждый кадр (дорого для GPU emitter). Pooling: Enable Pooling в Niagara System, Pool = сколько экземпляров хранить. Scalability: Niagara Significance Handler = управляет видимостью по расстоянию и бюджету. Scalability группы: Low/Medium/High/Epic. GPU Emitter ограничения: нет collision с Landscape, нет чтения материала, ограниченный scene query. Максимум частиц: GPU ~1M, CPU ~100K.`,"Зачем":"Неправильные bounds = GPU emitter рендерится всегда даже за экраном. Без pooling = Spawn/Destroy overhead для частых эффектов. Без scalability = VFX убивает мобайл."}}
+            tabsEn={{"Core Idea":"Bounds = particle system bounding box. If bounds outside frustum = system culled (not rendered). Fixed bounds critical for GPU emitters. Pooling = reuse systems instead of create/destroy. Scalability = scalability groups for automatic quality reduction.","In Interview":`Bounds: Fixed Bounds for GPU emitter (no bounds = always render, performance issue). Calculated Bounds = CPU computes every frame (expensive for GPU emitter). Pooling: Enable Pooling in Niagara System, Pool = how many instances to keep. Scalability: Niagara Significance Handler = manages visibility by distance and budget. Scalability groups: Low/Medium/High/Epic. GPU Emitter limits: no collision with Landscape, no material read, limited scene query. Max particles: GPU ~1M, CPU ~100K.`,"Why":"Wrong bounds = GPU emitter always renders even off-screen. Without pooling = Spawn/Destroy overhead for frequent effects. Without scalability = VFX destroys mobile."}}/>
+          </Section>
+
+          <Section title={lang==='ru'?"Flow Maps · Flipbooks · Vector Fields":"Flow Maps · Flipbooks · Vector Fields"} tag="techniques">
+            <LearnCard tabs={{"Суть":"Flow Map = текстура где RG хранит direction vector. UV дистортируется в направлении flow + Time. Flipbook = анимация через UV grid (кадры в одной текстуре, смещение по времени). Vector Field = 3D volume с векторами для Niagara (управляет скоростью частиц).","На интервью":`Flow Map: uv += flowTex.rg * 2 - 1) * Time * speed. Ping-pong blend двух фаз для seamless: lerp(phase0, phase1, abs(sin(Time))). Используй в: воде, лаве, дыме. Flipbook: uv offset = float2(frame % cols, floor(frame / cols)) / float2(cols, rows). Frame = floor(Time * fps) % totalFrames. Flipbook нод в UE5 уже готов. Vector Field: VectorField volume в Niagara CPU/GPU. Curl noise = процедурное vector field (Niagara Module). Turbulence без текстуры.`,"Зачем":"Flow map = стандарт для animated water без Skeletal Mesh. Flipbook = единственный способ воспроизвести сложную симуляцию (дым, взрыв) на мобайл без тяжёлых GPU частиц."}}
+            tabsEn={{"Core Idea":"Flow Map = texture where RG stores direction vector. UV distorted in flow direction + Time. Flipbook = animation via UV grid (frames in one texture, offset over time). Vector Field = 3D volume with vectors for Niagara (controls particle velocity).","In Interview":`Flow Map: uv += (flowTex.rg * 2 - 1) * Time * speed. Ping-pong blend two phases for seamless: lerp(phase0, phase1, abs(sin(Time))). Use for: water, lava, smoke. Flipbook: uv offset = float2(frame % cols, floor(frame / cols)) / float2(cols, rows). Frame = floor(Time * fps) % totalFrames. Flipbook node in UE5 built-in. Vector Field: VectorField volume in Niagara CPU/GPU. Curl noise = procedural vector field (Niagara Module). Turbulence without texture.`,"Why":"Flow map = standard for animated water without Skeletal Mesh. Flipbook = only way to play back complex simulation (smoke, explosion) on mobile without heavy GPU particles."}}/>
+          </Section>
+
+  
+          <Section title={lang==='ru'?"Niagara Profiling · Streaming · Hitch Types":"Niagara Profiling · Streaming · Hitch Types"} tag="profiling">
+            <LearnCard tabs={{"Суть":"Niagara hitch типы: spawn hitch (создание системы), simulate hitch (тяжёлый GPU tick), bounds hitch (пересчёт bounds каждый кадр). Profiling: stat Niagara, Niagara Debugger, Unreal Insights.","На интервью":`stat Niagara → Emitter count, Particle count, Simulation time. Niagara Debugger: Window → Niagara Debugger → Performance tab. Показывает топ-N самых дорогих эмиттеров. Spawn hitch: Pooling решает (держи M систем готовыми). Simulate hitch: слишком сложный Update модуль. Bounds hitch: Fixed Bounds вместо Calculated. Streaming: Niagara система с texture sampling = GPU emitter читает текстуру → texture streaming должна успеть загрузить mip. Visibility: Significance Handler + LOD = автоматически отключает невидимые. r.Niagara.System.PooledWorldManager.MaxPoolCount = глобальный лимит pooled систем.`,"Зачем":"Niagara GPU emitter без правильных bounds + pooling + scalability = performance катастрофа на мобайл и консоли. Profiling позволяет найти конкретный эмиттер, а не гадать."}}
+            tabsEn={{"Core Idea":"Niagara hitch types: spawn hitch (system creation), simulate hitch (heavy GPU tick), bounds hitch (bounds recalculation every frame). Profiling: stat Niagara, Niagara Debugger, Unreal Insights.","In Interview":`stat Niagara → Emitter count, Particle count, Simulation time. Niagara Debugger: Window → Niagara Debugger → Performance tab. Shows top-N most expensive emitters. Spawn hitch: Pooling solves it (keep M systems ready). Simulate hitch: too complex Update module. Bounds hitch: Fixed Bounds instead of Calculated. Streaming: Niagara system with texture sampling = GPU emitter reads texture → texture streaming must load mip in time. Visibility: Significance Handler + LOD = auto-disables invisible. r.Niagara.System.PooledWorldManager.MaxPoolCount = global pooled system limit.`,"Why":"Niagara GPU emitter without proper bounds + pooling + scalability = performance disaster on mobile and consoles. Profiling lets you find the specific emitter, not guess."}}/>
+          </Section>
+
+    </>)}
 
         {active==="mock"&&(<>
           <div style={{marginBottom:24}}><div style={{fontSize:10,color:C.accent,letterSpacing:3,marginBottom:4}}>{T[lang].mods.mock}</div><h1 style={{fontSize:28,fontWeight:700,margin:0,fontFamily:"system-ui,-apple-system,sans-serif",letterSpacing:-0.5}}>{T[lang].tabs.mock}</h1><p style={{color:C.muted,fontSize:13,marginTop:6,fontFamily:"system-ui,-apple-system,sans-serif"}}>{T[lang].modDesc.mock}</p></div>
@@ -3504,7 +5039,9 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"UE5 Python API — обёртка над C++ редактора. Работает в Editor (не в рантайме игры). Позволяет автоматизировать любые задачи: rename тысячи ассетов, проверить naming conventions, batch export, spawn акторов из CSV.",
                 "Зачем":"TA пишет инструменты которые экономят время художников. Batch rename 500 текстур вручную = 2 часа. Python скрипт = 30 секунд. Asset validation при коммите через CI/CD = нет кривых ассетов в проекте. Это ключевая часть работы TA в больших командах.",
                 "На интервью":`Основные классы: EditorAssetLibrary — load/save/rename/delete ассетов. AssetRegistryHelpers.get_asset_registry() → get_assets(filter) — поиск без загрузки в память (быстро). EditorLevelLibrary — spawn, get_all_level_actors. set_editor_property/get_editor_property — изменение любых настроек объекта. Запуск: Python консоль в редакторе или -ExecutePythonScript в headless режиме.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"UE5 Python API is a wrapper over the C++ editor. Works in the Output Log Python console, Editor Utility Widgets, or external scripts. Main module: import unreal. Enables automation of repetitive artist tasks without recompiling.","Analogy":"Python API is like a remote control for the UE5 editor. Each button on the remote = a Python function. You can press buttons in any sequence to automate complex workflows.","In Interview":`Key classes: EditorAssetLibrary (load/save/rename), AssetRegistryHelpers (search without loading), EditorLevelLibrary (actors), EditorUtilityLibrary (selection). Run scripts: Output Log → Python, or Editor Utility Widget with Execute Python Script node.`}}/>
+
               <PythonAPIRef/>
             </Section>
           <Section title={lang==='ru'?"Практические примеры — готовые скрипты":"Practical Examples — Ready-to-Use Scripts"} tag="examples"><PythonExamples/></Section>
@@ -3519,7 +5056,9 @@ float4 main(PSInput IN) : SV_Target {
                 "Суть":"Maya Python API работает через модуль maya.cmds (прямые MEL команды) или PyMEL (объектно-ориентированная обёртка). cmds быстрее, PyMEL удобнее для сложной логики. Оба делают одно и то же — управляют сценой Maya.",
                 "Аналогия":"cmds.getAttr('obj.tx') — как прямой вызов функции по имени. pm.PyNode('obj').tx.get() — как обращение к свойству объекта в ООП. Результат одинаковый, но PyMEL даёт autocomplete и методы объекта.",
                 "На интервью":`cmds.ls(type='mesh') — список всех мешей. cmds.ls(selection=True) — выделенные объекты. Атрибуты: getAttr/setAttr. Экспорт FBX: cmds.file(path, exportSelected=True, type='FBX export', force=True). PyMEL: import pymel.core as pm — те же операции через объекты. pymxs для 3ds Max: import pymxs; rt = pymxs.runtime — аналог cmds для Max.`
-              }}/>
+              }}
+              tabsEn={{"Core Idea":"Maya Python API works via the maya.cmds module (direct MEL commands) or PyMEL (object-oriented wrapper). cmds is faster, PyMEL is more convenient for complex logic. Both do the same thing — control the Maya scene.","Analogy":"cmds is like speaking direct commands: 'select this', 'rename that'. PyMEL is like working with objects: the mesh KNOWS its own name, has methods for renaming itself. Same result, different style.","In Interview":`cmds.ls(type='mesh') — list meshes. cmds.select('obj') — select. cmds.rename(old,new) — rename. cmds.getAttr('obj.tx') — get value. cmds.setAttr('obj.tx',5) — set value. PyMEL: import pymel.core as pm; node=pm.PyNode('name'); node.tx.get().`}}/>
+
               <MayaPythonRef/>
             </Section>
           <Section title={lang==='ru'?"Создание UI в Maya":"Creating UI in Maya"} tag="ui"><Code lang="python">{`import maya.cmds as cmds
